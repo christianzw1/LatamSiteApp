@@ -1,0 +1,58 @@
+{
+  "name": "latam-adm",
+  "version": "1.0.0",
+  "description": "LATAM ADM • aplicativo desktop com sincronização multimáster em LAN",
+  "author": "LATAM – 2025",
+  "main": "electron/main.js",                   
+  "scripts": {
+    "dev":   "cross-env NODE_ENV=dev electron .", 
+    "sync":  "node main/latam-sync.js",           
+    "dist":  "electron-builder --win --x64",     
+    "start": "electron ."                         
+  },
+
+  "dependencies": {
+    "bonjour": "^3.5.0",
+    "express": "^4.19.2",
+    "is-port-reachable": "^3.0.0",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2"
+  },
+
+  "devDependencies": {
+    "electron": "^29.0.0",
+    "electron-builder": "^24.11.0",
+    "cross-env": "^7.0.3"
+  },
+
+  "build": {
+    "appId": "com.latam.adm",
+    "productName": "LATAM ADM",
+    "copyright": "© 2025 LATAM",
+    "files": [
+      "public/**",           
+      "main/**",             
+      "electron/**",         
+      "package.json"
+    ],
+    "extraResources": [
+      { "from": "main/latam-data.json", "to": "latam-data.json" }
+    ],
+    "asarUnpack": [
+      "main/**"              
+    ],
+    "publish": null,         
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": [ "x64" ] }
+      ],
+      "icon": "icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "LATAM ADM"
+    }
+  }
+}

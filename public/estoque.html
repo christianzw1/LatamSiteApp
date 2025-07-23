@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LATAM ADM • Estoque</title>
+
+  <!-- Roboto -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --latam-blue:#004274;
+      --latam-magenta:#c41230;
+      --bg-gray:#f5f6fa;
+      --text-dark:#333;
+      --ok:#198754;
+      --attn:#ffc107;
+      --crit:#c41230;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:"Roboto",sans-serif;}
+
+    body{background:var(--bg-gray);padding:1.8rem;color:var(--text-dark);}
+
+    h2{color:var(--latam-blue);margin-bottom:.8rem;}
+
+    /* ===== CARD ===== */
+    .card{
+      background:#fff;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,.07);
+      padding:1.6rem;margin-bottom:2rem;
+    }
+
+    /* ===== TABLE ===== */
+    table{width:100%;border-collapse:collapse;margin-top:.8rem;}
+    th,td{padding:.55rem .65rem;border:1px solid #e0e0e0;font-size:.9rem;text-align:left;}
+    th{background:#eef1f6;position:sticky;top:0;z-index:1;}
+
+    tr.ok   td{background:#eaf7ee;}
+    tr.attn td{background:#fff7db;}
+    tr.crit td{background:#fde7ea;}
+
+    /* ===== FORM ===== */
+    form{display:flex;flex-direction:column;gap:.9rem;max-width:420px;}
+    label{font-size:.9rem;font-weight:500;}
+    input,select,textarea{
+      padding:.55rem .7rem;font-size:.95rem;border:1px solid #ccc;border-radius:6px;
+    }
+    input:focus,select:focus,textarea:focus{border-color:var(--latam-blue);outline:none;}
+    input[type=number]{-moz-appearance:textfield;}
+    input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{display:none;}
+
+    .btn{
+      align-self:flex-start;
+      background:var(--latam-magenta);color:#fff;border:none;border-radius:6px;
+      padding:.55rem 1.2rem;font-weight:500;cursor:pointer;transition:background .2s;
+    }
+    .btn:hover{background:#9b1026;}
+
+    .msg{font-size:.85rem;margin-top:.25rem;}
+    .msg.success{color:var(--ok);}
+    .msg.error{color:var(--crit);}
+
+    /* ===== HISTÓRICO ===== */
+    .hist-table{max-height:400px;overflow:auto;}
+    .hist-table thead th{position:sticky;top:0;}
+  </style>
+</head>
+
+<body>
+  <!-- === DASHBOARD === -->
+  <div class="card">
+    <h2>Estoque Atual</h2>
+    <div id="dashboard"></div>
+  </div>
+
+  <!-- === NOVA MOVIMENTAÇÃO === -->
+  <div class="card">
+    <h2>Nova Movimentação</h2>
+    <form id="txnForm">
+      <div>
+        <label for="itemSelect">Item</label>
+        <select id="itemSelect" required>
+          <option value="" hidden disabled selected>– selecione –</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="txnType">Tipo</label>
+        <select id="txnType" required>
+          <option value="IN">Entrada</option>
+          <option value="OUT">Saída</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="quantity">Quantidade</label>
+        <input type="number" id="quantity" min="1" required />
+      </div>
+
+      <div>
+        <label for="notes">Observações</label>
+        <textarea id="notes" rows="2" placeholder="(opcional)"></textarea>
+      </div>
+
+      <button type="submit" class="btn">Salvar</button>
+      <div id="formMsg" class="msg"></div>
+    </form>
+  </div>
+
+  <!-- === HISTÓRICO === -->
+  <div class="card">
+    <h2>Histórico de Movimentações</h2>
+    <div id="history" class="hist-table"></div>
+  </div>
+
+  <script>
+  /* ===== CONFIG ===== */
+  const API_URL = "https://script.google.com/macros/s/AKfycbxZ8ogL76p3vIUPZsiPLv9XnAhN1Z6KWK3IhRgKyGMUYN-2AmxQYUuO2v8i-PQxSpP_Cg/exec";
+  const SHEET_ITEMS = "ESTOQUE";        // id | name | unit | minLevel
+  const SHEET_TXNS  = "MOVIMENTACOES";  // id | item | tipo | quantidade | usuario | data | notas
+
+  /* ===== VARS ===== */
+  let items=[];     // catálogo
+  let txns=[];      // histórico completo
+  let stock={};     // id -> qty
+
+  /* ===== UTIL ===== */
+  const qs = s => document.querySelector(s);
+  function msg(el,text,err=false){
+    el.textContent=text;
+    el.className="msg "+(err?"error":"success");
+  }
+  async function fetchSheet(sheet,opts={}){
+    const res=await fetch(`${API_URL}?sheet=${encodeURIComponent(sheet)}`,opts);
+    if(!res.ok) throw new Error(await res.text());
+    const ct=res.headers.get("content-type")||"";
+    return ct.includes("application/json")?res.json():res.text();
+  }
+  function itemById(id){ return items.find(i=>i.id===id) || {}; }
+
+  /* ===== LOAD ===== */
+  document.addEventListener("DOMContentLoaded",init);
+
+  async function init(){
+    try{
+      await loadData();
+      qs("#txnForm").addEventListener("submit",saveTxn);
+    }catch(e){
+      alert("Erro ao carregar dados: "+e.message);
+      console.error(e);
+    }
+  }
+
+  async function loadData(){
+    [items, txns] = await Promise.all([
+      fetchSheet(SHEET_ITEMS),
+      fetchSheet(SHEET_TXNS)
+    ]);
+    calcStock();
+    renderTable();
+    renderHistory();
+    fillSelect();
+  }
+
+  function calcStock(){
+    stock = {}; items.forEach(i=>stock[i.id]=0);
+    txns.forEach(t=>{
+      const sign = t.tipo==="IN"?1:-1;
+      stock[t.item]=(stock[t.item]||0)+sign*Number(t.quantidade||0);
+    });
+  }
+
+  /* ===== RENDER DASHBOARD ===== */
+  function renderTable(){
+    const dash = qs("#dashboard");
+    if(items.length===0){
+      dash.innerHTML="<p>Nenhum item cadastrado na aba <strong>ESTOQUE</strong>.</p>";
+      return;
+    }
+    const rows = items.map(it=>{
+      const qty = stock[it.id]||0;
+      let cls="ok";
+      if(qty<=it.minLevel) cls="crit";
+      else if(qty<=it.minLevel*2) cls="attn";
+      return `
+        <tr class="${cls}">
+          <td>${it.name}</td>
+          <td>${it.unit}</td>
+          <td>${it.minLevel}</td>
+          <td>${qty}</td>
+        </tr>`;
+    }).join("");
+    dash.innerHTML=`
+      <table>
+        <thead><tr><th>Item</th><th>Unidade</th><th>Mínimo</th><th>Atual</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  /* ===== RENDER HISTORY ===== */
+  function renderHistory(){
+    const hist = qs("#history");
+    if(txns.length===0){
+      hist.innerHTML="<p>Sem movimentações registradas.</p>";
+      return;
+    }
+    // ordem decrescente por data
+    const sorted = [...txns].sort((a,b)=> new Date(b.data) - new Date(a.data));
+    const rows = sorted.map(t=>{
+      const it = itemById(t.item);
+      const sign = t.tipo==="IN" ? "+" : "–";
+      const cor  = t.tipo==="IN" ? "var(--ok)" : "var(--crit)";
+      return `
+        <tr>
+          <td>${t.data}</td>
+          <td>${it.name||"-"}</td>
+          <td style="color:${cor};font-weight:600;">${sign}${t.quantidade}</td>
+          <td>${t.usuario||"-"}</td>
+          <td>${t.notas||""}</td>
+        </tr>`;
+    }).join("");
+    hist.innerHTML=`
+      <table>
+        <thead><tr>
+          <th>Data</th><th>Item</th><th>Qtd</th><th>Usuário</th><th>Observações</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  /* ===== SELECT ===== */
+  function fillSelect(){
+    const sel=qs("#itemSelect");
+    sel.innerHTML='<option value="" hidden disabled selected>– selecione –</option>';
+    items.forEach(i=>{
+      const op=document.createElement("option");
+      op.value=i.id; op.textContent=i.name;
+      sel.appendChild(op);
+    });
+  }
+
+  /* ===== SAVE ===== */
+  async function saveTxn(e){
+    e.preventDefault();
+    const msgEl=qs("#formMsg");
+
+    const itemId = qs("#itemSelect").value;
+    const tipo   = qs("#txnType").value;
+    const qty    = Number(qs("#quantity").value);
+    const notas  = qs("#notes").value.trim();
+    if(!itemId || qty<=0){
+      msg(msgEl,"Preencha corretamente.",true);return;
+    }
+
+    const user = JSON.parse(localStorage.getItem("currentUser")||"{}");
+
+    const payload={
+      id:Date.now().toString(36),
+      item:itemId,
+      tipo,
+      quantidade:qty,
+      usuario:user?.nome||"Desconhecido",
+      data:new Date().toISOString().split("T")[0],
+      notas
+    };
+
+    try{
+      await fetchSheet(SHEET_TXNS,{method:"POST",body:JSON.stringify(payload)}); // sem Content-Type
+      msg(msgEl,"Movimentação salva!");
+      // atualiza variáveis locais
+      txns.push(payload);
+      const sign = tipo==="IN"?1:-1;
+      stock[itemId]=(stock[itemId]||0)+sign*qty;
+      renderTable();
+      renderHistory();
+      e.target.reset();
+    }catch(err){
+      msg(msgEl,"Erro ao salvar.",true);
+      console.error(err);
+    }
+  }
+  </script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LATAM ADM • Início</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --latam-blue:#004274;
+      --latam-magenta:#c41230;
+      --bg-gray:#f7f9fc;
+      --text-dark:#333;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:"Roboto",sans-serif;}
+    body{display:flex;min-height:100vh;background:var(--bg-gray);}
+
+    /* ===== SIDEBAR ===== */
+    .sidebar{
+      width:240px;min-height:100vh;background:var(--latam-blue);
+      color:#fff;display:flex;flex-direction:column;
+    }
+    .sidebar h2{padding:1.5rem;font-size:1.25rem;font-weight:700;}
+    .nav-link{
+      padding:1rem 1.5rem;cursor:pointer;white-space:nowrap;
+      transition:background .2s;
+    }
+    .nav-link:hover{background:rgba(255,255,255,.08);}
+    .nav-link.active{background:var(--latam-magenta);}
+    .logout-btn{
+      margin-top:auto;padding:1rem 1.5rem;cursor:pointer;
+      background:rgba(0,0,0,.15);transition:background .2s;
+    }
+    .logout-btn:hover{background:rgba(0,0,0,.25);}
+
+    /* ===== MAIN ===== */
+    .main{flex:1;display:flex;flex-direction:column;}
+    .header{
+      background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);
+      padding:.75rem 1.5rem;display:flex;justify-content:space-between;align-items:center;
+    }
+    .header .user{font-weight:500;color:var(--text-dark);}
+    .sync-btn{
+      background:var(--latam-magenta);border:none;color:#fff;
+      padding:.5rem 1rem;border-radius:6px;cursor:pointer;transition:background .2s;
+    }
+    .sync-btn:hover{background:#8d0f23;}
+    .content{flex:1;overflow:hidden;}
+    .iframe-page{width:100%;height:100%;border:none;}
+    .content-inner{padding:2rem;}
+  </style>
+</head>
+<body>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <h2>LATAM ADM</h2>
+    <div class="nav-link active" data-section="dashboard">🏠 Início</div>
+    <div class="nav-link" data-section="estoque">📦 Estoque</div>
+    <div class="nav-link" data-section="anexos">📂 Arquivos</div>
+    <div class="nav-link" data-section="mensagens">💬 Mensagens</div>
+    <div class="logout-btn" id="logout">🚪 Sair</div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <section class="main">
+    <header class="header">
+      <div class="user" id="userName"></div>
+      <button class="sync-btn" id="syncBtn">🔄 Sincronizar</button>
+    </header>
+
+    <div class="content" id="content"></div>
+  </section>
+
+  <script>
+    /* ---------- Proteção de rota ---------- */
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    if (!currentUser) location.href = "login.html";
+
+    /* ---------- Nome do usuário ---------- */
+    const userNameEl = document.getElementById("userName");
+    userNameEl.innerHTML =
+      currentUser.nome +
+      (currentUser.tipo === "Supervisor"
+        ? ' <span style="color:red">(Supervisor)</span>'
+        : " (Administrador)");
+
+    /* ---------- Navegação lateral ---------- */
+    const navLinks = document.querySelectorAll(".nav-link");
+    const content  = document.getElementById("content");
+
+    navLinks.forEach(link=>{
+      link.addEventListener("click",()=>{
+        navLinks.forEach(l=>l.classList.remove("active"));
+        link.classList.add("active");
+        renderSection(link.dataset.section);
+      });
+    });
+
+    function renderSection(section){
+      switch(section){
+        case "estoque":
+          content.innerHTML = '<iframe src="estoque.html" class="iframe-page"></iframe>';
+          break;
+        case "anexos":
+          content.innerHTML = '<iframe src="arquivos.html" class="iframe-page"></iframe>';
+          break;
+        case "mensagens":
+          content.innerHTML = '<iframe src="mensagens.html" class="iframe-page"></iframe>';
+          break;
+        default:
+          content.innerHTML = `
+            <div class="content-inner">
+              <h1>Bem-vindo(a) ao LATAM ADM</h1>
+              <p>Escolha uma opção no menu à esquerda para começar.</p>
+            </div>`;
+      }
+    }
+    renderSection("dashboard");
+
+    /* ---------- Botão Sincronizar ---------- */
+    document.getElementById("syncBtn").addEventListener("click", syncNow);
+
+    function syncNow(){
+      const active = document.querySelector(".nav-link.active").dataset.section;
+      if(active==="dashboard"){ location.reload(); return; }
+
+      const iframe = content.querySelector("iframe");
+      if(iframe){
+        const src = iframe.src;
+        iframe.src = "";          // força reload “limpo”
+        setTimeout(()=>iframe.src = src, 50);
+      }
+
+      const btn = document.getElementById("syncBtn");
+      btn.textContent = "✅ Sincronizado";
+      setTimeout(()=>btn.textContent = "🔄 Sincronizar", 1500);
+    }
+
+    /* ---------- Logout ---------- */
+    document.getElementById("logout").addEventListener("click",()=>{
+      localStorage.removeItem("currentUser");
+      location.href = "login.html";
+    });
+  </script>
+</body>
+</html>

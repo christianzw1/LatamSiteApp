@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LATAM ADM • Mensagens</title>
+
+  <!-- Roboto -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --latam-blue: #004274;
+      --latam-magenta: #c41230;
+      --bg-gray: #f5f6fa;
+      --text-dark: #333;
+      --border-gray: #ddd;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Roboto", sans-serif;
+    }
+    body {
+      display: flex;
+      height: 100vh;
+      background: var(--bg-gray);
+    }
+
+    /* ==== Lista de conversas ==== */
+    .conv-list {
+      width: 240px;
+      background: #fff;
+      border-right: 1px solid var(--border-gray);
+      display: flex;
+      flex-direction: column;
+    }
+    .conv-header {
+      padding: 1rem;
+      font-weight: 600;
+      color: var(--latam-blue);
+      border-bottom: 1px solid var(--border-gray);
+    }
+    #convList {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .conv-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+      transition: background 0.2s;
+    }
+    .conv-item:hover,
+    .conv-item.active {
+      background: var(--bg-gray);
+    }
+    .conv-item .name {
+      font-weight: 500;
+      display: block;
+      color: var(--text-dark);
+    }
+    .conv-item .time {
+      font-size: 0.75rem;
+      color: #666;
+      float: right;
+    }
+    .conv-item .preview {
+      font-size: 0.85rem;
+      color: #444;
+      margin-top: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ==== Área de chat ==== */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-header {
+      padding: 1rem;
+      background: #fff;
+      border-bottom: 1px solid var(--border-gray);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+      color: var(--latam-blue);
+    }
+    .messages {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      background: var(--bg-gray);
+    }
+    .msg {
+      max-width: 60%;
+      margin-bottom: 0.75rem;
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      background: #fff;
+      position: relative;
+      word-wrap: break-word;
+    }
+    .msg.self {
+      margin-left: auto;
+      background: var(--latam-magenta);
+      color: #fff;
+    }
+    .msg .meta {
+      font-size: 0.7rem;
+      color: #666;
+      margin-top: 0.3rem;
+    }
+
+    /* ==== Input ==== */
+    #msgForm {
+      display: flex;
+      padding: 0.75rem;
+      background: #fff;
+      border-top: 1px solid var(--border-gray);
+    }
+    #msgInput {
+      flex: 1;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+    #msgForm button {
+      margin-left: 0.5rem;
+      padding: 0 1rem;
+      background: var(--latam-blue);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    #msgForm button:hover {
+      background: #002054;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Lista de conversas -->
+  <div class="conv-list">
+    <div class="conv-header">Conversas</div>
+    <div id="convList"></div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-area">
+    <div class="chat-header">
+      <span id="chatTitle">Selecione uma conversa</span>
+      <span id="chatInfo"></span>
+    </div>
+    <div class="messages" id="messages"></div>
+    <form id="msgForm" style="display:none;">
+      <input type="text" id="msgInput" placeholder="Digite sua mensagem…" autocomplete="off" required />
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
+
+  <script>
+    /* ===== CONFIGURAÇÃO ===== */
+    const API_URL    = "https://script.google.com/macros/s/AKfycbxZ8ogL76p3vIUPZsiPLv9XnAhN1Z6KWK3IhRgKyGMUYN-2AmxQYUuO2v8i-PQxSpP_Cg/exec";
+    const SHEET_USERS = "USUARIOS";     // aba com colunas: id | nome | senha | tipo | dataCriacao
+    const SHEET_MSGS  = "MENSAGENS";    // aba com colunas: id | de | para | mensagem | data
+
+    /* ===== ESTADO ===== */
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
+    if (!currentUser) window.location.href = "login.html";
+
+    let users = [];
+    let msgs  = [];
+    let selectedUser = null;
+
+    /* ===== FUNÇÃO GENÉRICA de GET/POST no Sheets ===== */
+    async function fetchSheet(sheet, opts = {}) {
+      const res = await fetch(`${API_URL}?sheet=${encodeURIComponent(sheet)}`, opts);
+      if (!res.ok) throw new Error(await res.text());
+      const ct = res.headers.get("content-type") || "";
+      return ct.includes("application/json") ? res.json() : res.text();
+    }
+
+    /* ===== INICIALIZAÇÃO ===== */
+    document.addEventListener("DOMContentLoaded", init);
+    async function init() {
+      // carrega usuários e mensagens em paralelo
+      [users, msgs] = await Promise.all([
+        fetchSheet(SHEET_USERS),
+        fetchSheet(SHEET_MSGS)
+      ]);
+      buildConvList();
+      document.getElementById("msgForm").addEventListener("submit", sendMessage);
+    }
+
+    /* ===== MONTAR LISTA DE CONVERSAS ===== */
+    function buildConvList() {
+      const convDiv = document.getElementById("convList");
+      convDiv.innerHTML = "";
+
+      // lista todos os usuários exceto o próprio
+      const others = users.filter(u => u.nome !== currentUser.nome);
+
+      others.forEach(u => {
+        // histórico entre currentUser e u.nome
+        const history = msgs.filter(m =>
+          (m.de   === currentUser.nome && m.para === u.nome) ||
+          (m.de   === u.nome            && m.para === currentUser.nome)
+        );
+        const last = history
+          .sort((a,b)=> new Date(b.data) - new Date(a.data))[0] || {};
+
+        const item = document.createElement("div");
+        item.className = "conv-item" + (u.nome === selectedUser ? " active" : "");
+        item.onclick = () => openConversation(u.nome);
+
+        // nome e hora
+        const name = document.createElement("span");
+        name.className = "name";
+        name.textContent = u.nome;
+        item.appendChild(name);
+
+        if (last.data) {
+          const tm = document.createElement("span");
+          tm.className = "time";
+          tm.textContent = new Date(last.data).toLocaleTimeString([], {
+            hour: "2-digit", minute: "2-digit"
+          });
+          item.appendChild(tm);
+        }
+
+        if (last.mensagem) {
+          const pr = document.createElement("div");
+          pr.className = "preview";
+          pr.textContent = last.mensagem;
+          item.appendChild(pr);
+        }
+
+        convDiv.appendChild(item);
+      });
+    }
+
+    /* ===== ABRIR CONVERSA ===== */
+    function openConversation(userName) {
+      selectedUser = userName;
+      document.getElementById("chatTitle").textContent = userName;
+      document.getElementById("chatInfo").textContent  = `Chat com ${userName}`;
+      document.getElementById("msgForm").style.display = "flex";
+      renderMessages();
+      buildConvList();
+    }
+
+    /* ===== RENDERIZAR MENSAGENS ===== */
+    function renderMessages() {
+      const container = document.getElementById("messages");
+      container.innerHTML = "";
+
+      const history = msgs
+        .filter(m =>
+          (m.de   === currentUser.nome && m.para === selectedUser) ||
+          (m.de   === selectedUser      && m.para === currentUser.nome)
+        )
+        .sort((a,b)=> new Date(a.data) - new Date(b.data));
+
+      history.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "msg" + (m.de === currentUser.nome ? " self" : "");
+        div.textContent = m.mensagem;
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent =
+          (m.de === currentUser.nome ? "Você" : m.de) +
+          " • " +
+          new Date(m.data).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+
+        div.appendChild(meta);
+        container.appendChild(div);
+      });
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    /* ===== ENVIAR MENSAGEM ===== */
+    async function sendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById("msgInput");
+      const text  = input.value.trim();
+      if (!text) return;
+
+      const newMsg = {
+        id: Date.now().toString(),
+        de:   currentUser.nome,
+        para: selectedUser,
+        mensagem: text,
+        data: new Date().toISOString()
+      };
+
+      // grava no Sheets (sem Content-Type pra evitar pré-flight)
+      await fetchSheet(SHEET_MSGS, {
+        method: "POST",
+        body: JSON.stringify(newMsg)
+      });
+
+      // atualiza estado local e UI
+      msgs.push(newMsg);
+      input.value = "";
+      renderMessages();
+      buildConvList();
+    }
+  </script>
+</body>
+</html>

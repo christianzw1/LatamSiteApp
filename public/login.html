@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LATAM ADM • Login</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --latam-blue: #004274;
+      --latam-magenta: #c41230;
+      --bg-gray: #f7f9fc;
+      --text-dark: #333;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Roboto", sans-serif; }
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg-gray); }
+    .card { background: #fff; width: 420px; max-width: 90vw; padding: 2rem 2.5rem 3rem; border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,.08); }
+    .latam-logo { display: flex; align-items: center; gap: .6rem; margin-bottom: 1.5rem; }
+    .latam-logo-icon { width: 34px; height: 34px; background: var(--latam-magenta); clip-path: polygon(0 0,100% 0,60% 100%,0 100%); }
+    h1 { font-size: 1.4rem; color: var(--latam-blue); font-weight: 700; }
+    .tabs { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+    .tab-btn { flex: 1; text-align: center; padding: .6rem; cursor: pointer; border-bottom: 3px solid transparent; font-weight: 500; }
+    .tab-btn.active { border-color: var(--latam-magenta); color: var(--latam-magenta); }
+    form { display: none; flex-direction: column; gap: 1rem; }
+    form.active { display: flex; }
+    label { font-size: .9rem; font-weight: 500; color: var(--text-dark); }
+    input,select { padding: .55rem .75rem; font-size: .95rem; border: 1px solid #ccc; border-radius: 6px; outline: none; }
+    input:focus { border-color: var(--latam-blue); }
+    .btn { padding: .65rem; background: var(--latam-blue); color: #fff; border: none; border-radius: 6px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: background .2s; }
+    .btn:hover { background: #002f52; }
+    .message { text-align: center; margin-top: .5rem; font-size: .85rem; }
+    .message.success{color:seagreen}.message.error{color:#c41230}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="latam-logo">
+      <div class="latam-logo-icon"></div><h1>LATAM ADM</h1>
+    </div>
+
+    <div class="tabs">
+      <div id="loginTab" class="tab-btn active">Login</div>
+      <div id="registerTab" class="tab-btn">Cadastro</div>
+      <div id="recoverTab" class="tab-btn">Recuperar Senha</div>
+    </div>
+
+    <!-- Login -->
+    <form id="loginForm" class="active">
+      <div><label for="loginUsername">Usuário</label><input type="text" id="loginUsername" required /></div>
+      <div><label for="loginPassword">Senha</label><input type="password" id="loginPassword" required /></div>
+      <button type="submit" class="btn">Entrar</button>
+      <div id="loginMsg" class="message"></div>
+    </form>
+
+    <!-- Cadastro -->
+    <form id="registerForm">
+      <div><label for="regUsername">Usuário</label><input type="text" id="regUsername" required /></div>
+      <div><label for="regPassword">Senha</label><input type="password" id="regPassword" required /></div>
+      <div><label for="regRole">Tipo de Usuário</label>
+        <select id="regRole" required>
+          <option value="Administrador">Administrador</option>
+          <option value="Supervisor">Supervisor</option>
+        </select>
+      </div>
+      <div><label for="regKey">Chave de Permissão</label><input type="password" id="regKey" required /></div>
+      <button type="submit" class="btn">Cadastrar</button>
+      <div id="regMsg" class="message"></div>
+    </form>
+
+    <!-- Recuperar senha -->
+    <form id="recoverForm">
+      <div><label for="recoverUsername">Usuário</label><input type="text" id="recoverUsername" required /></div>
+      <div><label for="recoverKey">Chave de Permissão</label><input type="password" id="recoverKey" required /></div>
+      <button type="submit" class="btn">Mostrar Senha</button>
+      <div id="recoverMsg" class="message"></div>
+    </form>
+  </div>
+
+<script>
+/* ==== CONFIG ==== */
+const API_URL   = "https://script.google.com/macros/s/AKfycbxZ8ogL76p3vIUPZsiPLv9XnAhN1Z6KWK3IhRgKyGMUYN-2AmxQYUuO2v8i-PQxSpP_Cg/exec";
+const MASTER_KEY = "Christianzw1";
+
+/* ==== UTIL ==== */
+function showMessage(el,text,isError=false){el.textContent=text;el.className="message "+(isError?"error":"success");}
+async function fetchSheet(sheet,options={}){const r=await fetch(`${API_URL}?sheet=${encodeURIComponent(sheet)}`,options);
+ if(!r.ok)throw new Error(await r.text());const t=r.headers.get("content-type")||"";return t.includes("application/json")?r.json():JSON.parse(await r.text());}
+
+/* ==== TABS ==== */
+const tabs={loginTab,registerTab,recoverTab};
+const forms={loginForm,registerForm,recoverForm};
+Object.keys(tabs).forEach(id=>tabs[id].addEventListener("click",()=>{
+  Object.values(tabs).forEach(t=>t.classList.remove("active"));
+  tabs[id].classList.add("active");
+  Object.values(forms).forEach(f=>f.classList.remove("active"));
+  forms[id.replace("Tab","Form")].classList.add("active");
+}));
+
+/* ==== CADASTRO ==== */
+registerForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const username=regUsername.value.trim();
+  const password=regPassword.value;
+  const role=regRole.value;
+  const key=regKey.value;
+  if(key!==MASTER_KEY){showMessage(regMsg,"Chave de permissão inválida.",true);return;}
+
+  try{
+    const lista=await fetchSheet("usuarios");
+    if(Array.isArray(lista)&&lista.some(u=>u.nome===username)){
+      showMessage(regMsg,"Usuário já existe.",true);return;
+    }
+    const novo={id:Date.now().toString(),nome:username,senha:password,tipo:role,dataCriacao:new Date().toISOString().split("T")[0]};
+    await fetch(`${API_URL}?sheet=usuarios`,{method:"POST",body:JSON.stringify(novo)}); // sem headers → simples request
+    showMessage(regMsg,"Cadastro realizado com sucesso!");
+    registerForm.reset();
+  }catch(err){console.error(err);showMessage(regMsg,"Erro ao salvar.",true);}
+});
+
+/* ==== LOGIN ==== */
+loginForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const username=loginUsername.value.trim();
+  const password=loginPassword.value;
+  try{
+    const usuarios=await fetchSheet("usuarios");
+    const user=Array.isArray(usuarios)?usuarios.find(u=>u.nome===username&&u.senha===password):null;
+    if(!user){showMessage(loginMsg,"Usuário ou senha incorretos.",true);return;}
+    const roleLabel=user.tipo==="Supervisor"?" <span style='color:red'>(Supervisor)</span>":" (Administrador)";
+    showMessage(loginMsg,`Bem-vindo(a), ${user.nome}${roleLabel}!`);
+    localStorage.setItem("currentUser",JSON.stringify(user));
+    setTimeout(()=>location.href="inicio.html",1000);
+  }catch(err){console.error(err);showMessage(loginMsg,"Falha ao conectar com o servidor.",true);}
+});
+
+/* ==== RECUPERAR ==== */
+recoverForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(recoverKey.value!==MASTER_KEY){showMessage(recoverMsg,"Chave de permissão inválida.",true);return;}
+  try{
+    const usuarios=await fetchSheet("usuarios");
+    const user=usuarios.find(u=>u.nome===recoverUsername.value.trim());
+    if(!user){showMessage(recoverMsg,"Usuário não encontrado.",true);return;}
+    showMessage(recoverMsg,`Senha de ${user.nome}: ${user.senha}`);
+    recoverForm.reset();
+  }catch(err){console.error(err);showMessage(recoverMsg,"Erro ao recuperar.",true);}
+});
+</script>
+</body>
+</html>
