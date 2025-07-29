@@ -60,6 +60,10 @@
     /* ---------- Formulário ---------- */
     form{display:flex;flex-direction:column;gap:.9rem;max-width:460px;}
     label{font-size:.88rem;font-weight:500;}
+
+    /* wrapper p/ autocomplete */
+    .autocomplete{position:relative;}
+
     input,select,textarea{
       width:100%;padding:.52rem .7rem;font-size:.9rem;
       background:#0e1621;border:1px solid #444;border-radius:8px;
@@ -82,6 +86,22 @@
 
     .msg{font-size:.83rem;margin-top:.25rem;}
     .msg.success{color:var(--ok);} .msg.error{color:var(--crit);}
+
+    /* ---------- Autocomplete ---------- */
+    .autocomplete-list{
+      display:none;           /* é mostrada via JS */
+      position:absolute;left:0;right:0;top:100%;
+      background:#0e1621;border:1px solid #444;border-top:none;
+      max-height:230px;overflow-y:auto;
+      border-radius:0 0 8px 8px;z-index:1000;
+    }
+    .autocomplete-list .option{
+      padding:.55rem .7rem;cursor:pointer;white-space:nowrap;
+      text-overflow:ellipsis;overflow:hidden;
+    }
+    .autocomplete-list .option:hover{
+      background:rgba(109,40,217,.25);
+    }
 
     /* ---------- Filtros do histórico ---------- */
     .hist-filters{
@@ -120,9 +140,15 @@
     <form id="txnForm">
       <div>
         <label for="itemInput">Item</label>
-        <input id="itemInput" type="text" list="itemsList" placeholder="Comece a digitar..." required />
-        <datalist id="itemsList"></datalist>
+        <div class="autocomplete">
+          <!-- Mantém o datalist para quem estiver em desktop, mas agora há um autocomplete JS universal -->
+          <input id="itemInput" type="text" list="itemsList"
+                 placeholder="Comece a digitar..." autocomplete="off" required />
+          <datalist id="itemsList"></datalist>
+          <div id="itemSuggestions" class="autocomplete-list"></div>
+        </div>
       </div>
+
       <div>
         <label for="txnType">Tipo</label>
         <select id="txnType" required>
@@ -130,14 +156,17 @@
           <option value="OUT">Saída</option>
         </select>
       </div>
+
       <div>
         <label for="quantity">Quantidade</label>
         <input type="number" id="quantity" min="1" required />
       </div>
+
       <div>
         <label for="notes">Observações</label>
         <textarea id="notes" rows="2" placeholder="(opcional)"></textarea>
       </div>
+
       <button type="submit" class="btn">Salvar</button>
       <div id="formMsg" class="msg"></div>
     </form>
@@ -183,7 +212,12 @@
   document.addEventListener("DOMContentLoaded",async()=>{
     try{
       [items,txns]=await Promise.all([fetchSheet(SHEET_ITEMS),fetchSheet(SHEET_TXNS)]);
-      calcStock(); renderTable(); fillDatalist(); renderHistory();
+      calcStock();
+      renderTable();
+      fillDatalist();          // ainda preenche o <datalist> (desktop fallback)
+      setupAutocomplete();     // novo – lista JS que funciona em todo lugar
+      renderHistory();
+
       qs("#txnForm").addEventListener("submit",saveTxn);
       qs("#histSort").addEventListener("change",renderHistory);
       qs("#histSearch").addEventListener("input",renderHistory);
@@ -225,6 +259,47 @@
     items.forEach(i=>list.insertAdjacentHTML("beforeend",`<option value="${i.name}">`));
   }
 
+  /* ===== NOVO AUTOCOMPLETE CROSS-DEVICE ===== */
+  function setupAutocomplete(){
+    const input = qs("#itemInput");
+    const box   = qs("#itemSuggestions");
+
+    function closeBox(){ box.style.display="none"; }
+
+    // fecha ao clicar fora
+    document.addEventListener("click",e=>{
+      if(!e.target.closest(".autocomplete")) closeBox();
+    });
+
+    box.addEventListener("click",e=>{
+      const opt=e.target.closest(".option");
+      if(opt){
+        input.value=opt.dataset.name;
+        closeBox();
+      }
+    });
+
+    input.addEventListener("input",update);
+    input.addEventListener("focus",update);
+
+    function update(){
+      const val=input.value.trim().toLowerCase();
+      if(!val){ closeBox(); return; }
+
+      const matches = items
+        .filter(i=>i.name.toLowerCase().includes(val))
+        .slice(0,30); // limita para não estourar a tela
+
+      if(!matches.length){ closeBox(); return; }
+
+      box.innerHTML = matches
+        .map(i=>`<div class="option" data-name="${i.name}">${i.name}</div>`)
+        .join("");
+
+      box.style.display="block";
+    }
+  }
+
   /* ===== HISTÓRICO ===== */
   function renderHistory(){
     const hist=qs("#history");
@@ -237,7 +312,6 @@
     let list=[...txns];
 
     if(mode==="in"||mode==="out") list=list.filter(t=>t.tipo===mode.toUpperCase());
-
     if(mode==="old") list.sort((a,b)=>new Date(a.data)-new Date(b.data));
     else             list.sort((a,b)=>new Date(b.data)-new Date(a.data));
 
