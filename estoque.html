@@ -10,60 +10,100 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
 
   <style>
+    /* ---------- Variáveis ---------- */
     :root{
-      --latam-blue:#004274;
       --latam-magenta:#c41230;
-      --bg-gray:#f5f6fa;
-      --text-dark:#333;
-      --ok:#198754;
-      --attn:#ffc107;
-      --crit:#c41230;
+      --bg-1:#000; --bg-2:#011627; --bg-3:#1b006b;
+      --card-bg:#10151f; --accent:#6d28d9;
+      --text:#f1f5f9; --ok:#22c55e; --attn:#ffc107; --crit:var(--latam-magenta);
     }
+
+    /* ---------- Reset ---------- */
     *{margin:0;padding:0;box-sizing:border-box;font-family:"Roboto",sans-serif;}
 
-    body{background:var(--bg-gray);padding:1.8rem;color:var(--text-dark);}
+    /* ---------- Travar largura ---------- */
+    html,body{max-width:100%;overflow-x:hidden;}
 
-    h2{color:var(--latam-blue);margin-bottom:.8rem;}
+    /* ---------- Fundo animado ---------- */
+    @keyframes bgFlow{0%{background-position:0 0;}100%{background-position:400% 0;}}
+    body{
+      background:linear-gradient(130deg,var(--bg-1),var(--bg-2) 45%,var(--bg-3));
+      background-size:400% 400%;animation:bgFlow 25s ease infinite;
+      color:var(--text);
+      padding:1.4rem .8rem;
+    }
 
-    /* ===== CARD ===== */
+    h2{color:var(--accent);margin-bottom:.9rem;}
+
+    /* ---------- Card ---------- */
     .card{
-      background:#fff;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,.07);
-      padding:1.6rem;margin-bottom:2rem;
+      width:100%;
+      background:var(--card-bg);
+      border-radius:14px;
+      box-shadow:0 6px 25px rgba(0,0,0,.45);
+      padding:1.4rem 1.2rem;
+      margin-bottom:.9rem;
     }
 
-    /* ===== TABLE ===== */
-    table{width:100%;border-collapse:collapse;margin-top:.8rem;}
-    th,td{padding:.55rem .65rem;border:1px solid #e0e0e0;font-size:.9rem;text-align:left;}
-    th{background:#eef1f6;position:sticky;top:0;z-index:1;}
+    /* ---------- Tabelas ---------- */
+    #dashboard,.hist-table{overflow-x:auto;}
+    table{
+      width:100%;table-layout:fixed;border-collapse:collapse;font-size:.9rem;word-break:break-word;
+    }
+    th,td{padding:.6rem .65rem;border:1px solid #333;text-align:left;}
+    th{background:#0e1621;position:sticky;top:0;z-index:5;}
 
-    tr.ok   td{background:#eaf7ee;}
-    tr.attn td{background:#fff7db;}
-    tr.crit td{background:#fde7ea;}
+    tr.ok   td{background:rgba(34,197,94,.16);}
+    tr.attn td{background:rgba(255,193,7,.13);}
+    tr.crit td{background:rgba(196,18,48,.20);}
 
-    /* ===== FORM ===== */
-    form{display:flex;flex-direction:column;gap:.9rem;max-width:420px;}
-    label{font-size:.9rem;font-weight:500;}
+    /* ---------- Formulário ---------- */
+    form{display:flex;flex-direction:column;gap:.9rem;max-width:460px;}
+    label{font-size:.88rem;font-weight:500;}
     input,select,textarea{
-      padding:.55rem .7rem;font-size:.95rem;border:1px solid #ccc;border-radius:6px;
+      width:100%;padding:.52rem .7rem;font-size:.9rem;
+      background:#0e1621;border:1px solid #444;border-radius:8px;
+      color:var(--text);outline:none;
+      transition:border .2s,box-shadow .2s;
     }
-    input:focus,select:focus,textarea:focus{border-color:var(--latam-blue);outline:none;}
+    input:focus,select:focus,textarea:focus{
+      border-color:var(--accent);box-shadow:0 0 0 3px rgba(109,40,217,.35);
+    }
+    ::placeholder{color:#6c7a8d;}
     input[type=number]{-moz-appearance:textfield;}
     input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{display:none;}
 
     .btn{
-      align-self:flex-start;
-      background:var(--latam-magenta);color:#fff;border:none;border-radius:6px;
-      padding:.55rem 1.2rem;font-weight:500;cursor:pointer;transition:background .2s;
+      align-self:flex-start;background:var(--accent);color:#fff;border:none;
+      border-radius:8px;padding:.6rem 1.4rem;font-weight:500;cursor:pointer;
+      transition:background .2s,transform .15s;
     }
-    .btn:hover{background:#9b1026;}
+    .btn:hover{background:#5b21b6;} .btn:active{transform:scale(.97);}
 
-    .msg{font-size:.85rem;margin-top:.25rem;}
-    .msg.success{color:var(--ok);}
-    .msg.error{color:var(--crit);}
+    .msg{font-size:.83rem;margin-top:.25rem;}
+    .msg.success{color:var(--ok);} .msg.error{color:var(--crit);}
 
-    /* ===== HISTÓRICO ===== */
-    .hist-table{max-height:400px;overflow:auto;}
-    .hist-table thead th{position:sticky;top:0;}
+    /* ---------- Filtros do histórico ---------- */
+    .hist-filters{
+      display:flex;gap:.6rem;margin-bottom:.7rem;flex-wrap:wrap;
+    }
+    .hist-filters input,.hist-filters select{
+      background:#0e1621;border:1px solid #444;border-radius:8px;
+      padding:.45rem .6rem;font-size:.86rem;color:var(--text);
+    }
+    .hist-filters input{flex:1;min-width:120px;}
+    .hist-filters select{flex:0 0 160px;}
+
+    /* ---------- Mobile ---------- */
+    @media(max-width:480px){
+      body{padding:1rem .5rem;}
+      .card{padding:1.2rem .9rem;}
+      form{max-width:100%;}
+      .btn{width:100%;text-align:center;}
+      table{font-size:.82rem;}
+      .hist-filters{flex-direction:column;}
+      .hist-filters select{width:100%;}
+    }
   </style>
 </head>
 
@@ -79,12 +119,10 @@
     <h2>Nova Movimentação</h2>
     <form id="txnForm">
       <div>
-        <label for="itemSelect">Item</label>
-        <select id="itemSelect" required>
-          <option value="" hidden disabled selected>– selecione –</option>
-        </select>
+        <label for="itemInput">Item</label>
+        <input id="itemInput" type="text" list="itemsList" placeholder="Comece a digitar..." required />
+        <datalist id="itemsList"></datalist>
       </div>
-
       <div>
         <label for="txnType">Tipo</label>
         <select id="txnType" required>
@@ -92,17 +130,14 @@
           <option value="OUT">Saída</option>
         </select>
       </div>
-
       <div>
         <label for="quantity">Quantidade</label>
         <input type="number" id="quantity" min="1" required />
       </div>
-
       <div>
         <label for="notes">Observações</label>
         <textarea id="notes" rows="2" placeholder="(opcional)"></textarea>
       </div>
-
       <button type="submit" class="btn">Salvar</button>
       <div id="formMsg" class="msg"></div>
     </form>
@@ -111,174 +146,154 @@
   <!-- === HISTÓRICO === -->
   <div class="card">
     <h2>Histórico de Movimentações</h2>
+
+    <div class="hist-filters">
+      <input type="text" id="histSearch" placeholder="Pesquisar item…" />
+      <select id="histSort">
+        <option value="new">Mais recentes</option>
+        <option value="old">Mais antigas</option>
+        <option value="in">Somente Entradas</option>
+        <option value="out">Somente Saídas</option>
+      </select>
+    </div>
+
     <div id="history" class="hist-table"></div>
   </div>
 
   <script>
   /* ===== CONFIG ===== */
-  const API_URL = "https://script.google.com/macros/s/AKfycbxZ8ogL76p3vIUPZsiPLv9XnAhN1Z6KWK3IhRgKyGMUYN-2AmxQYUuO2v8i-PQxSpP_Cg/exec";
-  const SHEET_ITEMS = "ESTOQUE";        // id | name | unit | minLevel
-  const SHEET_TXNS  = "MOVIMENTACOES";  // id | item | tipo | quantidade | usuario | data | notas
+  const API_URL     = "https://script.google.com/macros/s/AKfycbxZ8ogL76p3vIUPZsiPLv9XnAhN1Z6KWK3IhRgKyGMUYN-2AmxQYUuO2v8i-PQxSpP_Cg/exec";
+  const SHEET_ITEMS = "ESTOQUE";
+  const SHEET_TXNS  = "MOVIMENTACOES";
 
-  /* ===== VARS ===== */
-  let items=[];     // catálogo
-  let txns=[];      // histórico completo
-  let stock={};     // id -> qty
+  /* ===== VARS & UTIL ===== */
+  let items=[], txns=[], stock={};
+  const qs=s=>document.querySelector(s);
+  const itemById=id=>items.find(i=>i.id===id)||{};
+  const showMsg=(el,t,e=false)=>{el.textContent=t;el.className="msg "+(e?"error":"success");};
 
-  /* ===== UTIL ===== */
-  const qs = s => document.querySelector(s);
-  function msg(el,text,err=false){
-    el.textContent=text;
-    el.className="msg "+(err?"error":"success");
-  }
   async function fetchSheet(sheet,opts={}){
-    const res=await fetch(`${API_URL}?sheet=${encodeURIComponent(sheet)}`,opts);
-    if(!res.ok) throw new Error(await res.text());
-    const ct=res.headers.get("content-type")||"";
-    return ct.includes("application/json")?res.json():res.text();
+    const r=await fetch(`${API_URL}?sheet=${encodeURIComponent(sheet)}`,opts);
+    if(!r.ok) throw new Error(await r.text());
+    const ct=r.headers.get("content-type")||"";
+    return ct.includes("application/json")?r.json():r.text();
   }
-  function itemById(id){ return items.find(i=>i.id===id) || {}; }
 
-  /* ===== LOAD ===== */
-  document.addEventListener("DOMContentLoaded",init);
-
-  async function init(){
+  /* ===== LOAD DATA ===== */
+  document.addEventListener("DOMContentLoaded",async()=>{
     try{
-      await loadData();
+      [items,txns]=await Promise.all([fetchSheet(SHEET_ITEMS),fetchSheet(SHEET_TXNS)]);
+      calcStock(); renderTable(); fillDatalist(); renderHistory();
       qs("#txnForm").addEventListener("submit",saveTxn);
-    }catch(e){
-      alert("Erro ao carregar dados: "+e.message);
-      console.error(e);
-    }
-  }
-
-  async function loadData(){
-    [items, txns] = await Promise.all([
-      fetchSheet(SHEET_ITEMS),
-      fetchSheet(SHEET_TXNS)
-    ]);
-    calcStock();
-    renderTable();
-    renderHistory();
-    fillSelect();
-  }
+      qs("#histSort").addEventListener("change",renderHistory);
+      qs("#histSearch").addEventListener("input",renderHistory);
+    }catch(err){alert("Erro ao carregar: "+err.message);console.error(err);}
+  });
 
   function calcStock(){
-    stock = {}; items.forEach(i=>stock[i.id]=0);
+    stock={};items.forEach(i=>stock[i.id]=0);
     txns.forEach(t=>{
-      const sign = t.tipo==="IN"?1:-1;
-      stock[t.item]=(stock[t.item]||0)+sign*Number(t.quantidade||0);
+      const s=t.tipo==="IN"?1:-1;
+      stock[t.item]=(stock[t.item]||0)+s*Number(t.quantidade||0);
     });
   }
 
-  /* ===== RENDER DASHBOARD ===== */
+  /* ===== DASHBOARD ===== */
   function renderTable(){
-    const dash = qs("#dashboard");
-    if(items.length===0){
-      dash.innerHTML="<p>Nenhum item cadastrado na aba <strong>ESTOQUE</strong>.</p>";
-      return;
-    }
-    const rows = items.map(it=>{
-      const qty = stock[it.id]||0;
-      let cls="ok";
-      if(qty<=it.minLevel) cls="crit";
-      else if(qty<=it.minLevel*2) cls="attn";
-      return `
-        <tr class="${cls}">
-          <td>${it.name}</td>
-          <td>${it.unit}</td>
-          <td>${it.minLevel}</td>
-          <td>${qty}</td>
-        </tr>`;
-    }).join("");
-    dash.innerHTML=`
-      <table>
-        <thead><tr><th>Item</th><th>Unidade</th><th>Mínimo</th><th>Atual</th></tr></thead>
-        <tbody>${rows}</tbody>
+    const dash=qs("#dashboard");
+    if(!items.length){dash.innerHTML="<p>Nenhum item cadastrado.</p>";return;}
+    dash.innerHTML=
+      `<table>
+        <thead><tr><th>Item</th><th>Unid.</th><th>Mín.</th><th>Atual</th></tr></thead>
+        <tbody>${
+          items.map(it=>{
+            const q=stock[it.id]||0;
+            const c=q<=it.minLevel?"crit":q<=it.minLevel*2?"attn":"ok";
+            return `<tr class="${c}">
+                      <td>${it.name}</td><td>${it.unit}</td>
+                      <td>${it.minLevel}</td><td>${q}</td>
+                    </tr>`;
+          }).join("")
+        }</tbody>
       </table>`;
   }
 
-  /* ===== RENDER HISTORY ===== */
+  /* ===== LISTA DE ITENS (datalist) ===== */
+  function fillDatalist(){
+    const list=qs("#itemsList");
+    list.innerHTML="";
+    items.forEach(i=>list.insertAdjacentHTML("beforeend",`<option value="${i.name}">`));
+  }
+
+  /* ===== HISTÓRICO ===== */
   function renderHistory(){
-    const hist = qs("#history");
-    if(txns.length===0){
-      hist.innerHTML="<p>Sem movimentações registradas.</p>";
-      return;
-    }
-    // ordem decrescente por data
-    const sorted = [...txns].sort((a,b)=> new Date(b.data) - new Date(a.data));
-    const rows = sorted.map(t=>{
-      const it = itemById(t.item);
-      const sign = t.tipo==="IN" ? "+" : "–";
-      const cor  = t.tipo==="IN" ? "var(--ok)" : "var(--crit)";
-      return `
-        <tr>
-          <td>${t.data}</td>
-          <td>${it.name||"-"}</td>
-          <td style="color:${cor};font-weight:600;">${sign}${t.quantidade}</td>
-          <td>${t.usuario||"-"}</td>
-          <td>${t.notas||""}</td>
-        </tr>`;
+    const hist=qs("#history");
+    if(!txns.length){hist.innerHTML="<p>Sem movimentações.</p>";return;}
+
+    /* --- filtros --- */
+    const mode   = qs("#histSort").value;
+    const search = qs("#histSearch").value.trim().toLowerCase();
+
+    let list=[...txns];
+
+    if(mode==="in"||mode==="out") list=list.filter(t=>t.tipo===mode.toUpperCase());
+
+    if(mode==="old") list.sort((a,b)=>new Date(a.data)-new Date(b.data));
+    else             list.sort((a,b)=>new Date(b.data)-new Date(a.data));
+
+    if(search) list=list.filter(t=>(itemById(t.item).name||"").toLowerCase().includes(search));
+
+    if(!list.length){hist.innerHTML="<p>Nenhuma movimentação encontrada.</p>";return;}
+
+    const rows=list.map(t=>{
+      const sign=t.tipo==="IN"?"+":"–";
+      const cor =t.tipo==="IN"?"var(--ok)":"var(--crit)";
+      return `<tr>
+                <td>${t.data}</td>
+                <td>${itemById(t.item).name||"-"}</td>
+                <td style="color:${cor};font-weight:600;">${sign}${t.quantidade}</td>
+                <td>${t.usuario||"-"}</td>
+                <td>${t.notas||""}</td>
+              </tr>`;
     }).join("");
-    hist.innerHTML=`
-      <table>
-        <thead><tr>
-          <th>Data</th><th>Item</th><th>Qtd</th><th>Usuário</th><th>Observações</th>
-        </tr></thead>
+
+    hist.innerHTML=
+      `<table>
+        <thead><tr><th>Data</th><th>Item</th><th>Qtd</th><th>Usuário</th><th>Obs.</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
   }
 
-  /* ===== SELECT ===== */
-  function fillSelect(){
-    const sel=qs("#itemSelect");
-    sel.innerHTML='<option value="" hidden disabled selected>– selecione –</option>';
-    items.forEach(i=>{
-      const op=document.createElement("option");
-      op.value=i.id; op.textContent=i.name;
-      sel.appendChild(op);
-    });
-  }
-
-  /* ===== SAVE ===== */
+  /* ===== SALVAR MOVIMENTAÇÃO ===== */
   async function saveTxn(e){
     e.preventDefault();
     const msgEl=qs("#formMsg");
 
-    const itemId = qs("#itemSelect").value;
-    const tipo   = qs("#txnType").value;
-    const qty    = Number(qs("#quantity").value);
-    const notas  = qs("#notes").value.trim();
-    if(!itemId || qty<=0){
-      msg(msgEl,"Preencha corretamente.",true);return;
-    }
+    const itemName = qs("#itemInput").value.trim();
+    const item     = items.find(i=>i.name.toLowerCase()===itemName.toLowerCase());
+    const tipo     = qs("#txnType").value;
+    const qty      = Number(qs("#quantity").value);
+    const notas    = qs("#notes").value.trim();
 
-    const user = JSON.parse(localStorage.getItem("currentUser")||"{}");
+    if(!item||qty<=0){showMsg(msgEl,"Preencha corretamente.",true);return;}
 
+    const user=JSON.parse(localStorage.getItem("currentUser")||"{}");
     const payload={
       id:Date.now().toString(36),
-      item:itemId,
-      tipo,
-      quantidade:qty,
+      item:item.id,tipo,quantidade:qty,
       usuario:user?.nome||"Desconhecido",
       data:new Date().toISOString().split("T")[0],
       notas
     };
 
     try{
-      await fetchSheet(SHEET_TXNS,{method:"POST",body:JSON.stringify(payload)}); // sem Content-Type
-      msg(msgEl,"Movimentação salva!");
-      // atualiza variáveis locais
+      await fetchSheet(SHEET_TXNS,{method:"POST",body:JSON.stringify(payload)});
+      showMsg(msgEl,"Movimentação salva!");
       txns.push(payload);
-      const sign = tipo==="IN"?1:-1;
-      stock[itemId]=(stock[itemId]||0)+sign*qty;
-      renderTable();
-      renderHistory();
+      stock[item.id]=(stock[item.id]||0)+(tipo==="IN"?qty:-qty);
+      renderTable();renderHistory();
       e.target.reset();
-    }catch(err){
-      msg(msgEl,"Erro ao salvar.",true);
-      console.error(err);
-    }
+    }catch(err){showMsg(msgEl,"Erro ao salvar.",true);console.error(err);}
   }
   </script>
 </body>
