@@ -3,344 +3,331 @@
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>LATAM ADM • Início</title>
-
-  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
-
   <style>
-    /* ---------- Variáveis ---------- */
     :root{
-      --latam-magenta:#c41230;
-
-      /* paleta escura */
-      --bg-dark-1:#000;
-      --bg-dark-2:#011627;
-      --bg-dark-3:#1b006b;
-      --sidebar-bg:#0e1621;
-      --card-bg:#151a24;
-      --accent:#6d28d9;
-      --text-main:#f1f5f9;
-      --text-dim:#a0aec0;
+      --sidebar-w:240px;
+      --bg:#0b1220; --bg-soft:#0e1621; --card:#10151f; --card-2:#0f1726;
+      --text:#f1f5f9; --muted:#8ea0b8; --line:#223145; --accent:#6d28d9;
+      --ok:#22c55e; --attn:#ffc107; --crit:#c41230; --radius:16px;
     }
-
-    /* ---------- Reset ---------- */
+    :root[data-theme="light"]{
+      --bg:#f5f7fb; --bg-soft:#ffffff; --card:#ffffff; --card-2:#f3f6fb;
+      --text:#0f172a; --muted:#475569; --line:#d7dde6; --accent:#6d28d9;
+      --ok:#16a34a; --attn:#b45309; --crit:#c41230;
+    }
     *{margin:0;padding:0;box-sizing:border-box;font-family:"Roboto",sans-serif;}
+    html,body{height:100%;}
+    body{display:flex;min-height:100vh;overflow:hidden;background:var(--bg);color:var(--text);font-size:16px;}
 
-    /* ---------- Animações ---------- */
-    @keyframes bgFlow{0%{background-position:0 0;}100%{background-position:400% 0;}}
-    @keyframes slideIn{from{transform:translateX(-100%);}to{transform:translateX(0);} }
-    @keyframes slideOut{from{transform:translateX(0);}to{transform:translateX(-100%);} }
-
-    /* ---------- Layout base ---------- */
-    body{
-      display:flex;min-height:100vh;overflow:hidden;
-      background:linear-gradient(130deg,var(--bg-dark-1),var(--bg-dark-2) 45%,var(--bg-dark-3));
-      background-size:400% 400%;animation:bgFlow 25s ease infinite;
-      color:var(--text-main);
-    }
-
-    /* ===== SIDEBAR ===== */
+    /* ===== Sidebar (dockável) ===== */
     .sidebar{
-      width:240px;min-height:100vh;background:var(--sidebar-bg);
-      display:flex;flex-direction:column;flex-shrink:0;
-      transition:transform .35s ease;
-      z-index:200;
+      width:var(--sidebar-w); min-height:100vh; background:var(--bg-soft);
+      display:flex; flex-direction:column; flex-shrink:0; border-right:1px solid var(--line);
+      position:fixed; left:0; top:0; z-index:300;
+      transform:translateX(-100%); transition:.25s;
     }
-    .sidebar h2{padding:1.5rem;font-size:1.25rem;font-weight:700;white-space:nowrap;}
-    .nav-link,
-    .logout-btn{
-      position:relative;                 /* necessário p/ badge */
-      padding:1rem 1.5rem;cursor:pointer;white-space:nowrap;
-      transition:background .2s,color .2s;
-      background-size:200% 100%;
-    }
-    .nav-link:hover{background:rgba(255,255,255,.06);}
-    .nav-link.active{
-      background:linear-gradient(130deg,var(--accent),var(--accent) 40%,#4c1db4 80%);
-      color:#fff;
-    }
-    .logout-btn{margin-top:auto;background:rgba(255,255,255,.05);}
-    .logout-btn:hover{background:rgba(255,255,255,.12);}
+    body.sidebar-visible .sidebar{ transform:translateX(0); }
 
-    /* ----- Badge ----- */
-    .badge{
-      position:absolute;
-      top:10px;
-      right:18px;
-      width:12px;
-      height:12px;
-      border-radius:50%;
-      background:var(--latam-magenta);
-      display:none;
-      pointer-events:none;
-    }
+    .sidebar h2{padding:1.1rem 1.25rem;font-size:1.15rem;font-weight:700;white-space:nowrap;}
+    .nav-link,.logout-btn{position:relative;padding:1rem 1.25rem;cursor:pointer;white-space:nowrap;transition:.2s;}
+    .nav-link:hover{background:rgba(0,0,0,.06);}
+    :root[data-theme="light"] .nav-link:hover{background:rgba(0,0,0,.04);}
+    .nav-link.active{background:linear-gradient(130deg,var(--accent),#4c1db4);color:#fff;}
+    .logout-btn{margin-top:auto;background:rgba(0,0,0,.05);}
+    :root[data-theme="light"] .logout-btn{background:rgba(0,0,0,.03);}
+    .logout-btn:hover{opacity:.9;}
+    .badge{position:absolute;top:10px;right:18px;width:12px;height:12px;border-radius:50%;background:var(--crit);display:none;pointer-events:none;}
 
-    /* ===== MAIN ===== */
-    .main{flex:1;display:flex;flex-direction:column;min-width:0;}
-    .header{
-      background:var(--sidebar-bg);padding:.75rem 1.5rem;
-      display:flex;justify-content:space-between;align-items:center;
-      box-shadow:0 2px 6px rgba(0,0,0,.5);flex-shrink:0;
-    }
-    .user{font-weight:500;}
-    .sync-btn{
-      background:var(--accent);border:none;color:#fff;
-      padding:.5rem 1rem;border-radius:6px;cursor:pointer;
-      transition:background .2s,transform .15s;
-    }
-    .sync-btn:hover{background:#5b21b6;}
-    .sync-btn:active{transform:scale(.97);}
-
-    /* ↓↓↓ CORREÇÃO AQUI ↓↓↓  */
-    .content{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      overflow-y:auto;               /* libera rolagem vertical */
-      -webkit-overflow-scrolling:touch;
-    }
-    .iframe-page{
-      flex:1 0 auto;                /* ocupa todo o espaço disponível */
-      width:100%;
-      border:none;
-      background:var(--card-bg);
-    }
-    /* ↑↑↑ ---------------- ↑↑↑ */
-
-    .content-inner{padding:2rem;flex:1;background:var(--card-bg);overflow-y:auto;}
-    .content-inner h1{margin-bottom:.75rem;}
-
-    /* ---------- Botão menu mobile ---------- */
-    .menu-btn{
-      display:none;cursor:pointer;border:none;background:none;
-      font-size:1.5rem;color:var(--text-main);
-      margin-right:1rem;
-    }
-
-    /* ---------- Overlay mobile ---------- */
+    /* ===== Overlay (só mobile/tablet) ===== */
     .overlay{
-      position:fixed;inset:0;background:rgba(0,0,0,.55);
-      backdrop-filter:blur(2px);
-      z-index:150;opacity:0;pointer-events:none;
-      transition:opacity .3s;
+      position:fixed; inset:0; background:rgba(0,0,0,.45);
+      backdrop-filter:blur(2px); z-index:200;
+      opacity:0; pointer-events:none; transition:.25s;
     }
-    .overlay.show{opacity:1;pointer-events:auto;}
 
-    /* ---------- Responsividade ---------- */
+    /* ===== Main ===== */
+    .main{flex:1;display:flex;flex-direction:column;min-width:0;margin-left:0;}
+    @media (min-width:1024px){
+      .overlay{display:none!important;}
+      body.sidebar-visible .main{ margin-left:var(--sidebar-w); } /* docka sem “buraco” */
+    }
+
+    .header{background:var(--bg-soft);padding:.6rem .8rem;display:flex;align-items:center;gap:.6rem;box-shadow:0 1px 0 var(--line);position:sticky;top:0;z-index:250;}
+    .user{font-weight:500;margin-left:auto;}
+    .btn{background:var(--accent);color:#fff;border:none;border-radius:12px;padding:.55rem .9rem;cursor:pointer;transition:.2s;min-height:44px;}
+    .btn:hover{filter:brightness(.95);}
+    .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text);}
+    .btn.toggle{display:inline-flex;align-items:center;gap:.4rem}
+    .menu-btn{display:inline-flex;border:none;background:none;color:var(--text);font-size:1.35rem;cursor:pointer;padding:.3rem .5rem;border-radius:8px;min-height:44px;}
+
+    .content{flex:1;min-height:0;display:flex;flex-direction:column;overflow:auto;}
+    .container{flex:1;min-height:0;padding:12px;display:grid;gap:12px;grid-template-columns:repeat(12,1fr);padding-bottom:max(12px, env(safe-area-inset-bottom));}
+
+    .card{background:var(--card);border-radius:var(--radius);border:1px solid var(--line);box-shadow:0 6px 18px rgba(0,0,0,.18);
+      padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0;overflow:hidden;}
+    .card h3{font-size:.98rem;color:var(--text);padding:2px 4px;}
+    .section-body{display:flex;flex-direction:column;gap:10px;min-height:0;}
+
+    .list{display:flex;flex-direction:column;gap:8px;min-height:0;}
+    .list .item{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--card-2);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:44px;}
+    .item .txt{min-width:0;display:flex;flex-direction:column;gap:4px;}
+    .title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+    .sub{color:var(--muted);font-size:.85rem;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;}
+    .chip{flex:0 0 auto;min-width:36px;height:28px;border-radius:999px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);font-weight:700;}
+    .chip.ok{color:var(--ok);border-color:var(--ok)} .chip.warn{color:var(--attn);border-color:var(--attn)} .chip.crit{color:var(--crit);border-color:var(--crit)}
+
+    .col-4{grid-column:span 4;} .col-5{grid-column:span 5;} .col-7{grid-column:span 7;} .col-12{grid-column:span 12;}
+    .iframe-wrap{flex:1;min-height:0;display:flex;} .iframe-page{flex:1;min-height:0;border:none;border-radius:12px;background:var(--card);}
+
+    /* ===== Mobile: accordions em vez de grid + iframe ===== */
+    details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;}
+    details+details{margin-top:10px;}
+    summary{list-style:none;cursor:pointer;font-weight:700;color:var(--text);display:flex;align-items:center;justify-content:space-between;}
+    summary::-webkit-details-marker{display:none;}
+
+    @media(max-width:1100px){.col-4,.col-5{grid-column:span 6;} .col-7{grid-column:span 6;}}
     @media(max-width:768px){
-      body{flex-direction:column;}
-
-      /* hamburger visível */
-      .menu-btn{display:block;}
-
-      /* sidebar escondida por padrão */
-      .sidebar{
-        position:fixed;left:0;top:0;height:100vh;
-        transform:translateX(-100%);
-      }
-      .sidebar.open{
-        animation:slideIn .35s forwards;
-      }
-      .sidebar.close{
-        animation:slideOut .35s forwards;
-      }
-
-      /* navegação horizontal oculta, usamos burger; logo menor */
-      .sidebar h2{padding:1.2rem 1.5rem;font-size:1.1rem;}
-
-      .header{
-        padding:.6rem 1rem;justify-content:flex-start;gap:.8rem;
-      }
-      .header .user{font-size:.95rem;margin-left:auto;}
-      .sync-btn{font-size:.9rem;padding:.45rem .9rem;}
+      .container{grid-template-columns:repeat(6,1fr);gap:10px;}
+      .col-7,.col-5,.col-4{grid-column:span 6;}
+      .card{border-radius:14px;padding:10px;}
     }
-
     @media(max-width:480px){
-      .header .user{font-size:.9rem;}
-      .nav-link{font-size:.9rem;}
-      .logout-btn{font-size:.9rem;}
-    }
-    @media(max-width:360px){
-      .nav-link{font-size:.85rem;padding:.8rem 1rem;}
+      .container{grid-template-columns:repeat(4,1fr);gap:10px;}
+      .col-7,.col-5,.col-4{grid-column:span 4;}
     }
   </style>
 </head>
 <body>
-
-  <!-- Overlay para fechar menu tocando fora -->
   <div id="overlay" class="overlay"></div>
 
-  <!-- ===== SIDEBAR ===== -->
   <aside id="sidebar" class="sidebar">
     <h2>LATAM ADM</h2>
     <div class="nav-link active" data-section="dashboard">🏠 Início</div>
     <div class="nav-link" data-section="estoque">📦 Estoque</div>
     <div class="nav-link" data-section="anexos">📂 Arquivos</div>
-    <div class="nav-link" id="messagesLink" data-section="mensagens">
-      💬 Mensagens
-      <span id="msgBadge" class="badge"></span>
-    </div>
+    <div class="nav-link" id="messagesLink" data-section="mensagens">💬 Mensagens <span id="msgBadge" class="badge"></span></div>
     <div class="logout-btn" id="logout">🚪 Sair</div>
   </aside>
 
-  <!-- ===== MAIN ===== -->
   <section class="main">
     <header class="header">
-      <button id="menuBtn" class="menu-btn" aria-label="Abrir menu">☰</button>
+      <button id="menuBtn" class="menu-btn" aria-label="Menu">☰</button>
       <div class="user" id="userName"></div>
-      <button class="sync-btn" id="syncBtn">🔄 Sincronizar</button>
+      <button class="btn toggle" id="themeBtn" title="Alternar tema">🌙 / ☀️</button>
+      <button class="btn" id="syncBtn">🔄 Atualizar</button>
     </header>
-
     <div class="content" id="content"></div>
   </section>
 
 <script>
-/* ---------- Proteção de rota ---------- */
+/* ===== Theme ===== */
+const root=document.documentElement;
+const savedTheme=localStorage.getItem("theme")||"dark";
+if(savedTheme==="light") root.setAttribute("data-theme","light");
+function broadcastTheme(mode){
+  localStorage.setItem("theme", mode==="light"?"light":"dark");
+  document.querySelectorAll("iframe").forEach(f=>{ try{ f.contentWindow?.postMessage({type:"theme", value:mode}, "*"); }catch{} });
+}
+function currentTheme(){ return root.getAttribute("data-theme")==="light" ? "light" : "dark"; }
+document.getElementById("themeBtn").addEventListener("click",()=>{
+  const isLight = currentTheme()==="light";
+  if(isLight){ root.removeAttribute("data-theme"); broadcastTheme("dark"); }
+  else{ root.setAttribute("data-theme","light"); broadcastTheme("light"); }
+});
+
+/* ===== Auth ===== */
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 if(!currentUser) location.href="login.html";
-
-/* ---------- Nome do usuário ---------- */
 document.getElementById("userName").innerHTML =
-  currentUser.nome +
-  (currentUser.tipo==="Supervisor"
-    ? ' <span style="color:#c41230">(Supervisor)</span>'
-    : " (Administrador)");
+  currentUser.nome + (currentUser.tipo==="Supervisor" ? ' <span style="color:#c41230">(Supervisor)</span>' : " (Administrador)");
 
-/* ---------- Navegação lateral ---------- */
-const sidebar   = document.getElementById("sidebar");
-const overlay   = document.getElementById("overlay");
-const menuBtn   = document.getElementById("menuBtn");
-const navLinks  = document.querySelectorAll(".nav-link");
-const content   = document.getElementById("content");
-const msgBadge  = document.getElementById("msgBadge");
+/* ===== Sidebar / Overlay ===== */
+const sidebar = document.getElementById("sidebar");
+const overlay  = document.getElementById("overlay");
+const body     = document.body;
+const isMobile = () => matchMedia("(max-width:1023.98px)").matches;
 
-/* ---- abrir/fechar menu mobile ---- */
-function openMenu(){
-  sidebar.classList.remove("close");
-  sidebar.classList.add("open");
-  overlay.classList.add("show");
+function setSidebar(open){
+  body.classList.toggle("sidebar-visible", !!open);
+  if(isMobile()){
+    overlay.style.opacity = open ? 1 : 0;
+    overlay.style.pointerEvents = open ? "auto" : "none";
+  }else{
+    overlay.style.opacity = 0;
+    overlay.style.pointerEvents = "none";
+  }
 }
-function closeMenu(){
-  sidebar.classList.remove("open");
-  sidebar.classList.add("close");
-  overlay.classList.remove("show");
-}
-menuBtn.addEventListener("click",openMenu);
-overlay.addEventListener("click",closeMenu);
+document.getElementById("menuBtn").onclick = () => setSidebar(!body.classList.contains("sidebar-visible"));
+overlay.onclick = () => setSidebar(false);
+addEventListener("resize", () => { if(!isMobile()){ overlay.style.opacity=0; overlay.style.pointerEvents="none"; } });
 
-/* ---- links ---- */
-navLinks.forEach(link=>{
-  link.addEventListener("click",()=>{
-    navLinks.forEach(l=>l.classList.remove("active"));
-    link.classList.add("active");
-    renderSection(link.dataset.section);
-    if(window.innerWidth<=768) closeMenu();   // fecha após seleção
-  });
-});
+/* ===== Nav ===== */
+const content=document.getElementById("content");
+const navLinks=[...document.querySelectorAll(".nav-link")];
+navLinks.forEach(l=>l.onclick=()=>{ navLinks.forEach(n=>n.classList.remove("active")); l.classList.add("active"); renderSection(l.dataset.section); setSidebar(false); });
 
-/* ---------- Renderização das seções ---------- */
+/* ===== API & Cache ===== */
+const API_URL="https://script.google.com/macros/s/AKfycbxZ8ogL76p3vIUPZsiPLv9XnAhN1Z6KWK3IhRgKyGMUYN-2AmxQYUuO2v8i-PQxSpP_Cg/exec";
+const SHEET_ITEMS="ESTOQUE", SHEET_TXNS="MOVIMENTACOES", SHEET_MSGS="MENSAGENS";
+async function fetchSheet(sheet){ const r=await fetch(`${API_URL}?sheet=${encodeURIComponent(sheet)}`); if(!r.ok) throw new Error(await r.text()); return r.json(); }
+function cacheGet(key,maxAge){ try{ const raw=localStorage.getItem(key); if(!raw) return null; const {ts,data}=JSON.parse(raw); if(Date.now()-ts>maxAge) return null; return data; }catch{return null;} }
+function cacheSet(key,data){ localStorage.setItem(key,JSON.stringify({ts:Date.now(),data})); }
+
+/* ===== Dashboard state ===== */
+let items=[], txns=[], stock={};
+function calcStock(){ stock={}; items.forEach(i=>stock[i.id]=0); txns.forEach(t=>{ const s=t.tipo==="IN"?1:-1; stock[t.item]=(stock[t.item]||0)+s*Number(t.quantidade||0); }); }
+
+/* ===== Render ===== */
 function renderSection(section){
-  switch(section){
-    case "estoque":
-      content.innerHTML='<iframe src="estoque.html" class="iframe-page"></iframe>';
-      break;
-    case "anexos":
-      content.innerHTML='<iframe src="arquivos.html" class="iframe-page"></iframe>';
-      break;
-    case "mensagens":
-      content.innerHTML='<iframe src="mensagens.html" class="iframe-page"></iframe>';
-      clearAllUnread();                      // remove badge ao entrar na área de mensagens
-      break;
-    default:
-      content.innerHTML=`
-        <div class="content-inner">
-          <h1>Bem-vindo(a) ao LATAM ADM</h1>
-          <p>Escolha uma opção no menu para começar.</p>
-        </div>`;
+  if(section==="estoque"){ 
+    content.innerHTML = '<div class="iframe-wrap"><iframe src="estoque.html" class="iframe-page" title="Estoque"></iframe></div>';
+    const ifr = content.querySelector("iframe"); ifr.onload=()=>broadcastTheme(currentTheme());
+    return; 
+  }
+  if(section==="anexos"){  
+    content.innerHTML = '<div class="iframe-wrap"><iframe src="arquivos.html" class="iframe-page" title="Arquivos"></iframe></div>';
+    const ifr = content.querySelector("iframe"); ifr.onload=()=>broadcastTheme(currentTheme());
+    return; 
+  }
+  if(section==="mensagens"){ 
+    content.innerHTML = '<div class="iframe-wrap"><iframe src="mensagens.html" class="iframe-page" title="Mensagens"></iframe></div>'; 
+    const ifr = content.querySelector("iframe"); ifr.onload=()=>broadcastTheme(currentTheme());
+    clearAllUnread(); 
+    return; 
+  }
+
+  // DASHBOARD
+  if(isMobile()){
+    // versão MOBILE: accordions
+    content.innerHTML = `
+      <div style="padding:12px; display:flex; flex-direction:column;">
+        <details open id="accResumo"><summary>Resumo</summary><div id="resumoBox" style="margin-top:8px;"></div></details>
+        <details id="accUrg"><summary>Reposição urgente</summary><div id="reposicaoBox" style="margin-top:8px;"></div></details>
+        <details id="accUlt"><summary>Movimentações (últimas 24h)</summary><div id="ultimasBox" style="margin-top:8px;"></div></details>
+        <details id="accAtv"><summary>Atividade por usuário (7 dias)</summary><div id="atividadeBox" style="margin-top:8px;"></div></details>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+          <button class="btn" onclick="renderSection('estoque')">Abrir Estoque</button>
+          <button class="btn ghost" onclick="renderSection('mensagens')">Abrir Mensagens</button>
+        </div>
+      </div>`;
+  }else{
+    // versão DESKTOP (grid + embed estoque)
+    content.innerHTML = `
+      <div class="container">
+        <div class="card col-4"><h3>Resumo</h3><div class="section-body" id="resumoBox"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" onclick="renderSection('estoque')">Ir para Estoque</button>
+            <button class="btn ghost" onclick="renderSection('mensagens')">Abrir Mensagens</button>
+          </div>
+        </div>
+        <div class="card col-4"><h3>Reposição urgente</h3><div class="section-body" id="reposicaoBox"></div></div>
+        <div class="card col-4"><h3>Movimentações (últimas 24h)</h3><div class="section-body" id="ultimasBox"></div></div>
+        <div class="card col-5"><h3>Atividade recente (por usuário)</h3><div class="section-body" id="atividadeBox"></div></div>
+        <div class="card col-7">
+          <h3>Atalhos • Estoque</h3>
+          <div class="iframe-wrap"><iframe id="dashEstoque" src="estoque.html" class="iframe-page" title="Estoque"></iframe></div>
+        </div>
+      </div>`;
+    const ifr = document.getElementById("dashEstoque"); ifr.onload=()=>broadcastTheme(currentTheme());
+  }
+
+  // Cache + refresh
+  const ci = cacheGet("cache:ESTOQUE", 5*60*1000);
+  const ct = cacheGet("cache:MOVIMENTACOES", 60*1000);
+  if(ci && ct){
+    items=ci; txns=ct; calcStock(); paintDashboard();
+    Promise.all([fetchSheet(SHEET_ITEMS), fetchSheet(SHEET_TXNS)]).then(([i,t])=>{
+      cacheSet("cache:ESTOQUE", i); cacheSet("cache:MOVIMENTACOES", t);
+      items=i; txns=t; calcStock(); paintDashboard();
+    }).catch(console.error);
+  }else{
+    Promise.all([fetchSheet(SHEET_ITEMS), fetchSheet(SHEET_TXNS)]).then(([i,t])=>{
+      cacheSet("cache:ESTOQUE", i); cacheSet("cache:MOVIMENTACOES", t);
+      items=i; txns=t; calcStock(); paintDashboard();
+    }).catch(console.error);
   }
 }
-renderSection("dashboard");
 
-/* ---------- Botão Sincronizar ---------- */
-document.getElementById("syncBtn").addEventListener("click",syncNow);
-function syncNow(){
-  const active = document.querySelector(".nav-link.active").dataset.section;
-  if(active==="dashboard"){location.reload();return;}
+/* ===== Painters ===== */
+function resumoItem(label, value, cls=""){
+  return `<div class="list"><div class="item"><div class="txt"><div class="title">${label}</div></div><div class="chip ${cls}">${value}</div></div></div>`;
+}
+function paintDashboard(){
+  const abaixo = items.filter(i => (stock[i.id]||0) <= i.minLevel).length;
+  const ult24 = txns.filter(t => Date.now()-new Date(t.data).getTime()<24*3600*1000);
+  const in24  = ult24.filter(t=>t.tipo==="IN").length;
+  const out24 = ult24.filter(t=>t.tipo==="OUT").length;
+  document.getElementById("resumoBox").innerHTML =
+    resumoItem("Itens abaixo do mínimo", abaixo, abaixo? "crit":"ok")
+    + resumoItem("Entradas (24h)", `+${in24}`, "ok")
+    + resumoItem("Saídas (24h)", `-${out24}`, "crit")
+    + resumoItem("Itens cadastrados", items.length);
 
-  const iframe = content.querySelector("iframe");
-  if(iframe){
-    const src=iframe.src;iframe.src="";setTimeout(()=>iframe.src=src,50);
-  }
-  const btn=document.getElementById("syncBtn");
-  btn.textContent="✅ Sincronizado";
-  setTimeout(()=>btn.textContent="🔄 Sincronizar",1500);
+  const urg = items.map(i=>({it:i,q:stock[i.id]||0}))
+    .filter(x=>x.q<=x.it.minLevel)
+    .sort((a,b)=>(a.q-a.it.minLevel)-(b.q-b.it.minLevel)).slice(0,12);
+  document.getElementById("reposicaoBox").innerHTML =
+    urg.length ? urg.map(({it,q})=>`
+      <div class="list"><div class="item">
+        <div class="txt"><div class="title">${it.name}</div><div class="sub">${q} ${it.unit} • mín. ${it.minLevel}</div></div>
+        <div class="chip crit">-${it.minLevel - q}</div>
+      </div></div>`).join("")
+    : `<div class="muted">Sem urgências. 🔋</div>`;
+
+  const ult = ult24.sort((a,b)=>new Date(b.data)-new Date(a.data)).slice(0,15);
+  document.getElementById("ultimasBox").innerHTML =
+    ult.length ? ult.map(t=>{
+      const it=items.find(i=>String(i.id)===String(t.item));
+      const s=t.tipo==="IN"?"+":"–", cls=t.tipo==="IN"?"ok":"crit";
+      return `<div class="list"><div class="item">
+        <div class="txt"><div class="title">${it?.name||"-"}</div><div class="sub">${new Date(t.data).toLocaleString('pt-BR')} • ${t.usuario||"—"} ${t.notas?`• ${t.notas}`:""}</div></div>
+        <div class="chip ${cls}">${s}${t.quantidade}</div>
+      </div></div>`;
+    }).join("") : `<div class="muted">Nada nas últimas 24h.</div>`;
+
+  const limite = Date.now()-7*24*3600*1000;
+  const map=new Map();
+  txns.forEach(t=>{ const d=new Date(t.data).getTime(); if(d>=limite){ const u=t.usuario||"—"; map.set(u,(map.get(u)||0)+1); } });
+  const rank=[...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,12);
+  document.getElementById("atividadeBox").innerHTML =
+    rank.length ? rank.map(([u,c])=>`<div class="list"><div class="item"><div class="txt"><div class="title">${u}</div></div><div class="chip">${c}</div></div></div>`).join("")
+    : `<div class="muted">Sem atividade recente.</div>`;
 }
 
-/* ---------- Logout ---------- */
-document.getElementById("logout").addEventListener("click",()=>{
-  localStorage.removeItem("currentUser");
-  location.href="index.html";
-});
-
-/* ========================================================================= */
-/* ===================      SISTEMA DE NOTIFICAÇÃO      ==================== */
-/* ========================================================================= */
-const API_URL     = "https://script.google.com/macros/s/AKfycbxZ8ogL76p3vIUPZsiPLv9XnAhN1Z6KWK3IhRgKyGMUYN-2AmxQYUuO2v8i-PQxSpP_Cg/exec";
-const SHEET_MSGS  = "MENSAGENS";
-
-/* --- util GET planilha --- */
-async function fetchSheet(sheet){
-  const res = await fetch(`${API_URL}?sheet=${encodeURIComponent(sheet)}`);
-  if(!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-/* --- ler último horário visualizado --- */
-function getLastRead(){
-  return Number(localStorage.getItem("msgsLastRead")||0);
-}
-function setLastRead(time){
-  localStorage.setItem("msgsLastRead",String(time));
-}
-
-/* --- exibe ou esconde badge --- */
-function toggleBadge(show){
-  msgBadge.style.display = show ? "block" : "none";
-}
-
-/* --- verifica se há mensagens não lidas --- */
+/* ===== Mensagens badge ===== */
+const msgBadge=document.getElementById("msgBadge");
+function getLastRead(){return Number(localStorage.getItem("msgsLastRead")||0);}
+function setLastRead(t){localStorage.setItem("msgsLastRead",String(t));}
+function toggleBadge(show){msgBadge.style.display=show?"block":"none";}
 async function checkForNewMessages(){
   try{
-    const msgs = await fetchSheet(SHEET_MSGS);
-    const lastRead = getLastRead();
-
-    const hasUnread = msgs.some(m =>
-      m.para === currentUser.nome && new Date(m.data).getTime() > lastRead
-    );
+    const msgs=await fetchSheet(SHEET_MSGS);
+    const hasUnread = msgs.some(m=>m.para===currentUser.nome && new Date(m.data).getTime()>getLastRead());
     toggleBadge(hasUnread);
-  }catch(e){
-    console.error("Erro ao verificar mensagens:",e);
-  }
+  }catch(e){console.error(e);}
 }
+function clearAllUnread(){ setLastRead(Date.now()); toggleBadge(false); }
+checkForNewMessages(); setInterval(checkForNewMessages,30000);
 
-/* --- limpar badge manualmente (ao entrar em mensagens) --- */
-function clearAllUnread(){
-  setLastRead(Date.now());
-  toggleBadge(false);
-}
+/* ===== Sync / Logout ===== */
+document.getElementById("syncBtn").onclick=()=>{
+  const active = document.querySelector(".nav-link.active")?.dataset.section;
+  if(active==="dashboard"){ renderSection("dashboard"); return; }
+  const iframe = content.querySelector("iframe"); if(iframe){ const src=iframe.src; iframe.src=""; setTimeout(()=>{iframe.src=src; iframe.onload=()=>broadcastTheme(currentTheme());},50); }
+};
+document.getElementById("logout").onclick=()=>{ localStorage.removeItem("currentUser"); location.href="index.html"; };
 
-/* --- ouvir mensagem do iframe indicando leitura específica --- */
-window.addEventListener("message",(e)=>{
-  if(e.data && e.data.type === "read"){
-    clearAllUnread();
-  }
+/* Re-render do dashboard se mudar tamanho (troca layout auto) */
+addEventListener('resize', ()=>{
+  const active = document.querySelector(".nav-link.active")?.dataset.section;
+  if(active==="dashboard") renderSection("dashboard");
 });
 
-/* --- pooling a cada 30 s --- */
-checkForNewMessages();
-setInterval(checkForNewMessages,30_000);
+/* start */
+renderSection("dashboard");
 </script>
 </body>
 </html>

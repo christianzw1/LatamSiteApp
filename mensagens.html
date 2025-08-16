@@ -5,278 +5,166 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LATAM ADM • Mensagens</title>
-
-  <!-- Roboto -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
-
   <style>
-    /* ---------- Variáveis (mesmas do estoque.html) ---------- */
     :root{
-      --latam-magenta:#c41230;
-      --bg-1:#000; --bg-2:#011627; --bg-3:#1b006b;
-      --card-bg:#10151f; --accent:#6d28d9;
-      --text:#f1f5f9; --ok:#22c55e; --attn:#ffc107; --crit:var(--latam-magenta);
-      --border-dark:#222;
+      --bg:#0b1220; --bg-soft:#0e1621; --card:#10151f; --card-2:#0f1726;
+      --text:#f1f5f9; --muted:#8ea0b8; --line:#223145; --accent:#6d28d9;
     }
-
-    /* ---------- Reset ---------- */
+    :root[data-theme="light"]{
+      --bg:#f5f7fb; --bg-soft:#ffffff; --card:#ffffff; --card-2:#f3f6fb;
+      --text:#0f172a; --muted:#475569; --line:#d7dde6; --accent:#6d28d9;
+    }
     *{margin:0;padding:0;box-sizing:border-box;font-family:"Roboto",sans-serif;}
-
-    /* ---------- Fundo animado ---------- */
-    @keyframes bgFlow{0%{background-position:0 0;}100%{background-position:400% 0;}}
-    html,body{max-width:100%;overflow:hidden;height:100vh;}
-    body{
-      display:flex;
-      background:linear-gradient(130deg,var(--bg-1),var(--bg-2) 45%,var(--bg-3));
-      background-size:400% 400%;animation:bgFlow 25s ease infinite;
-      color:var(--text);
-      padding:1.4rem .8rem;
-      gap:1rem;
-    }
-
-    h2{color:var(--accent);margin-bottom:.9rem;}
-
-    /* ---------- Card base ---------- */
-    .card{
-      background:var(--card-bg);
-      border-radius:14px;
-      box-shadow:0 6px 25px rgba(0,0,0,.45);
-      display:flex;
-      flex-direction:column;
-    }
-
-    /* ---------- Lista de conversas ---------- */
-    .conv-list{
-      width:260px;min-width:200px;max-width:320px;
-      overflow:hidden;
-    }
-    .conv-header{
-      padding:1rem;
-      font-weight:600;
-      color:var(--accent);
-      border-bottom:1px solid var(--border-dark);
-    }
-    #convList{flex:1;overflow-y:auto;}
-    .conv-item{padding:.75rem 1rem;cursor:pointer;border-bottom:1px solid var(--border-dark);transition:background .2s;}
-    .conv-item:hover{background:#0e1621;}
-    .conv-item.active{background:rgba(109,40,217,.15);} /* highlight ativa */
-    .conv-item .name{font-weight:500;display:block;color:var(--text);}
-    .conv-item .time{font-size:.75rem;color:#a3b3c9;float:right;}
-    .conv-item .preview{font-size:.84rem;color:#cbd5e1;margin-top:.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-
-    /* ---------- Área de chat ---------- */
-    .chat-area{flex:1;min-width:0;}
-    .chat-header{
-      padding:1rem;
-      background:#0e1621;
-      border-bottom:1px solid var(--border-dark);
-      display:flex;justify-content:space-between;align-items:center;
-      font-weight:500;color:var(--accent);
-      border-top-left-radius:14px;border-top-right-radius:14px;
-    }
-    .messages{
-      flex:1;
-      padding:1rem;
-      overflow-y:auto;
-      background:#0c141e;
-    }
-    .msg{
-      max-width:60%;
-      margin-bottom:.75rem;
-      padding:.6rem .8rem;
-      border-radius:10px;
-      background:#1e293b;
-      position:relative;
-      word-wrap:break-word;
-      box-shadow:0 2px 6px rgba(0,0,0,.35);
-    }
-    .msg.self{
-      margin-left:auto;
-      background:var(--accent);
-      color:#fff;
-    }
-    .msg .meta{
-      font-size:.7rem;
-      color:#94a3b8;
-      margin-top:.3rem;
-    }
-
-    /* ---------- Input ---------- */
-    #msgForm{display:flex;padding:.9rem 1rem;background:#0e1621;border-top:1px solid var(--border-dark);border-bottom-left-radius:14px;border-bottom-right-radius:14px;gap:.6rem;}
-    #msgInput{flex:1;padding:.55rem .7rem;font-size:.9rem;background:#1e293b;border:1px solid #334155;border-radius:8px;color:var(--text);outline:none;}
-    #msgInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(109,40,217,.35);}
-    #msgForm button{padding:0 1.2rem;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.95rem;font-weight:500;transition:background .2s,transform .15s;}
-    #msgForm button:hover{background:#5b21b6;}#msgForm button:active{transform:scale(.97);}
-
-    /* ---------- Scrollbars ---------- */
-    ::-webkit-scrollbar{width:8px;height:8px;}
-    ::-webkit-scrollbar-thumb{background:#334155;border-radius:4px;}
-    ::-webkit-scrollbar-track{background:#0c141e;}
-
-    /* ---------- Mobile ---------- */
-    @media(max-width:640px){
-      body{flex-direction:column;padding:1rem .5rem;overflow:auto;height:auto;}
+    html,body{height:100%;}
+    body{display:flex;gap:12px;background:var(--bg);color:var(--text);padding:12px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.25);display:flex;flex-direction:column;min-height:0;}
+    .conv-list{width:300px;min-width:220px;max-width:340px;overflow:hidden;}
+    .conv-header{padding:.9rem 1rem;border-bottom:1px solid var(--line);font-weight:700;color:var(--accent);display:flex;align-items:center;justify-content:space-between;}
+    #convList{flex:1;overflow:auto;}
+    .conv-item{padding:.75rem 1rem;border-bottom:1px solid var(--line);cursor:pointer;transition:.2s;}
+    .conv-item:hover{background:var(--card-2);} .conv-item.active{outline:2px solid var(--accent);}
+    .conv-item .top{display:flex;gap:8px;align-items:center;justify-content:space-between;}
+    .conv-item .name{font-weight:600;} .conv-item .time{font-size:.75rem;color:var(--muted);}
+    .conv-item .preview{font-size:.85rem;color:var(--muted);margin-top:.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .chat{flex:1;min-width:0;}
+    .chat-header{padding:12px 16px;background:var(--bg-soft);border-bottom:1px solid var(--line);border-top-left-radius:14px;border-top-right-radius:14px;display:flex;align-items:center;gap:8px;}
+    .back{display:none;border:1px solid var(--line);background:transparent;color:var(--text);border-radius:8px;padding:6px 10px;cursor:pointer;}
+    .title{font-weight:700;color:var(--accent);}
+    .messages{flex:1;overflow:auto;background:var(--card-2);padding:12px;display:flex;flex-direction:column;gap:8px;}
+    .msg{max-width:70%;padding:.6rem .8rem;border-radius:12px;background:var(--bg-soft);box-shadow:0 2px 6px rgba(0,0,0,.25);}
+    .msg.self{margin-left:auto;background:var(--accent);color:#fff;}
+    .meta{font-size:.72rem;opacity:.8;margin-top:.3rem;}
+    #msgForm{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);background:var(--bg-soft);border-bottom-left-radius:14px;border-bottom-right-radius:14px;}
+    #msgInput{flex:1;padding:.6rem .75rem;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);outline:none;}
+    #msgInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(109,40,217,.25);}
+    #sendBtn{padding:0 1.1rem;border:none;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;}
+    @media(max-width:720px){
+      body{flex-direction:column;}
       .conv-list{width:100%;max-height:260px;}
-      .chat-area{flex:1;height:auto;}
+      .back{display:inline-block;}
     }
   </style>
 </head>
-
 <body>
-  <!-- Lista de conversas -->
   <div class="card conv-list">
     <div class="conv-header">Conversas</div>
     <div id="convList"></div>
   </div>
 
-  <!-- Chat -->
-  <div class="card chat-area">
+  <div class="card chat">
     <div class="chat-header">
-      <span id="chatTitle">Selecione uma conversa</span>
-      <span id="chatInfo"></span>
+      <button class="back" id="backBtn">← Conversas</button>
+      <span class="title" id="chatTitle">Selecione uma conversa</span>
+      <span id="chatInfo" style="margin-left:auto;color:var(--muted)"></span>
     </div>
     <div class="messages" id="messages"></div>
     <form id="msgForm" style="display:none;">
       <input type="text" id="msgInput" placeholder="Digite sua mensagem…" autocomplete="off" required />
-      <button type="submit">Enviar</button>
+      <button id="sendBtn" type="submit">Enviar</button>
     </form>
   </div>
 
-  <script>
-    /* ===== CONFIGURAÇÃO ===== */
-    const API_URL    = "https://script.google.com/macros/s/AKfycbxZ8ogL76p3vIUPZsiPLv9XnAhN1Z6KWK3IhRgKyGMUYN-2AmxQYUuO2v8i-PQxSpP_Cg/exec";
-    const SHEET_USERS = "USUARIOS";     // id | nome | senha | tipo | dataCriacao
-    const SHEET_MSGS  = "MENSAGENS";    // id | de | para | mensagem | data
+<script>
+/* ===== Tema do app (recebe do parent) ===== */
+function applyTheme(mode){
+  if(mode==="light") document.documentElement.setAttribute("data-theme","light");
+  else document.documentElement.removeAttribute("data-theme");
+}
+applyTheme(localStorage.getItem("theme")||"dark");
+window.addEventListener("message",(e)=>{ if(e?.data?.type==="theme"){ applyTheme(e.data.value); }});
 
-    /* ===== ESTADO ===== */
-    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
-    if (!currentUser) window.location.href = "login.html";
+/* ===== CONFIG ===== */
+const API_URL    = "https://script.google.com/macros/s/AKfycbxZ8ogL76p3vIUPZsiPLv9XnAhN1Z6KWK3IhRgKyGMUYN-2AmxQYUuO2v8i-PQxSpP_Cg/exec";
+const SHEET_USERS = "USUARIOS";
+const SHEET_MSGS  = "MENSAGENS";
 
-    let users = [];
-    let msgs  = [];
-    let selectedUser = null;
+/* ===== ESTADO ===== */
+const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
+if (!currentUser) window.location.href = "login.html";
+let users = []; let msgs = []; let selectedUser = null;
 
-    /* ===== Função genérica GET/POST Sheets ===== */
-    async function fetchSheet(sheet, opts = {}){
-      const res = await fetch(`${API_URL}?sheet=${encodeURIComponent(sheet)}`, opts);
-      if(!res.ok) throw new Error(await res.text());
-      const ct = res.headers.get("content-type") || "";
-      return ct.includes("application/json") ? res.json() : res.text();
-    }
+/* ===== Helpers Sheets ===== */
+async function fetchSheet(sheet, opts = {}){
+  const res = await fetch(`${API_URL}?sheet=${encodeURIComponent(sheet)}`, opts);
+  if(!res.ok) throw new Error(await res.text());
+  const ct = res.headers.get("content-type") || "";
+  return ct.includes("application/json") ? res.json() : res.text();
+}
 
-    /* ===== Inicialização ===== */
-    document.addEventListener("DOMContentLoaded", init);
-    async function init(){
-      [users, msgs] = await Promise.all([
-        fetchSheet(SHEET_USERS),
-        fetchSheet(SHEET_MSGS)
-      ]);
-      buildConvList();
-      document.getElementById("msgForm").addEventListener("submit", sendMessage);
-    }
+/* ===== Init ===== */
+document.addEventListener("DOMContentLoaded", init);
+async function init(){
+  [users, msgs] = await Promise.all([ fetchSheet(SHEET_USERS), fetchSheet(SHEET_MSGS) ]);
+  buildConvList();
+  document.getElementById("msgForm").addEventListener("submit", sendMessage);
+  document.getElementById("backBtn").addEventListener("click", ()=>window.scrollTo({top:0,behavior:"smooth"}));
+}
 
-    /* ===== Montar lista de conversas ===== */
-    function buildConvList(){
-      const convDiv = document.getElementById("convList");
-      convDiv.innerHTML = "";
+/* ===== Conversas ===== */
+function buildConvList(){
+  const convDiv = document.getElementById("convList");
+  convDiv.innerHTML = "";
+  const others = users.filter(u => u.nome !== currentUser.nome);
+  others.forEach(u => {
+    const history = msgs.filter(m =>
+      (m.de===currentUser.nome && m.para===u.nome) || (m.de===u.nome && m.para===currentUser.nome)
+    ).sort((a,b)=> new Date(b.data) - new Date(a.data));
+    const last = history[0] || {};
+    const item = document.createElement("div");
+    item.className = "conv-item" + (u.nome === selectedUser ? " active" : "");
+    item.onclick = () => openConversation(u.nome);
+    const top = document.createElement("div"); top.className="top";
+    const name = document.createElement("span"); name.className="name"; name.textContent = u.nome;
+    top.appendChild(name);
+    const tm = document.createElement("span"); tm.className="time";
+    if(last.data) tm.textContent = new Date(last.data).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+    top.appendChild(tm);
+    const preview = document.createElement("div"); preview.className="preview"; preview.textContent = last.mensagem || "Sem mensagens";
+    item.appendChild(top); item.appendChild(preview); convDiv.appendChild(item);
+  });
+}
 
-      const others = users.filter(u => u.nome !== currentUser.nome);
+/* ===== Abrir conversa ===== */
+function openConversation(userName){
+  selectedUser = userName;
+  document.getElementById("chatTitle").textContent = userName;
+  document.getElementById("chatInfo").textContent  = `Chat com ${userName}`;
+  document.getElementById("msgForm").style.display = "flex";
+  renderMessages();
+  buildConvList();
+  window.parent.postMessage({type:"read"}, "*");
+}
 
-      others.forEach(u => {
-        const history = msgs.filter(m =>
-          (m.de   === currentUser.nome && m.para === u.nome) ||
-          (m.de   === u.nome            && m.para === currentUser.nome)
-        );
-        const last = history.sort((a,b)=> new Date(b.data) - new Date(a.data))[0] || {};
+/* ===== Mensagens ===== */
+function renderMessages(){
+  const container = document.getElementById("messages");
+  container.innerHTML = "";
+  const history = msgs.filter(m =>
+    (m.de===currentUser.nome && m.para===selectedUser) || (m.de===selectedUser && m.para===currentUser.nome)
+  ).sort((a,b)=> new Date(a.data) - new Date(b.data));
+  history.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "msg" + (m.de === currentUser.nome ? " self" : "");
+    div.innerHTML = `${m.mensagem}<div class="meta">${m.de===currentUser.nome?"Você":m.de} • ${new Date(m.data).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</div>`;
+    container.appendChild(div);
+  });
+  container.scrollTop = container.scrollHeight;
+}
 
-        const item = document.createElement("div");
-        item.className = "conv-item" + (u.nome === selectedUser ? " active" : "");
-        item.onclick = () => openConversation(u.nome);
-
-        const name = document.createElement("span");
-        name.className = "name";
-        name.textContent = u.nome;
-        item.appendChild(name);
-
-        if(last.data){
-          const tm = document.createElement("span");
-          tm.className = "time";
-          tm.textContent = new Date(last.data).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
-          item.appendChild(tm);
-        }
-
-        if(last.mensagem){
-          const pr = document.createElement("div");
-          pr.className = "preview";
-          pr.textContent = last.mensagem;
-          item.appendChild(pr);
-        }
-
-        convDiv.appendChild(item);
-      });
-    }
-
-    /* ===== Abrir conversa ===== */
-    function openConversation(userName){
-      selectedUser = userName;
-      document.getElementById("chatTitle").textContent = userName;
-      document.getElementById("chatInfo").textContent  = `Chat com ${userName}`;
-      document.getElementById("msgForm").style.display = "flex";
-      renderMessages();
-      buildConvList();
-
-      /* ---- avisa o parent que foi lida ---- */
-      window.parent.postMessage({type:"read"}, "*");
-    }
-
-    /* ===== Renderizar mensagens ===== */
-    function renderMessages(){
-      const container = document.getElementById("messages");
-      container.innerHTML = "";
-
-      const history = msgs.filter(m =>
-        (m.de === currentUser.nome && m.para === selectedUser) ||
-        (m.de === selectedUser      && m.para === currentUser.nome)
-      ).sort((a,b)=> new Date(a.data) - new Date(b.data));
-
-      history.forEach(m => {
-        const div = document.createElement("div");
-        div.className = "msg" + (m.de === currentUser.nome ? " self" : "");
-        div.textContent = m.mensagem;
-
-        const meta = document.createElement("div");
-        meta.className = "meta";
-        meta.textContent = `${m.de === currentUser.nome ? "Você" : m.de} • ${new Date(m.data).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;
-
-        div.appendChild(meta);
-        container.appendChild(div);
-      });
-
-      container.scrollTop = container.scrollHeight;
-    }
-
-    /* ===== Enviar mensagem ===== */
-    async function sendMessage(e){
-      e.preventDefault();
-      const input = document.getElementById("msgInput");
-      const text = input.value.trim();
-      if(!text) return;
-
-      const newMsg = {
-        id: Date.now().toString(),
-        de: currentUser.nome,
-        para: selectedUser,
-        mensagem: text,
-        data: new Date().toISOString()
-      };
-
-      await fetchSheet(SHEET_MSGS, {method:"POST", body:JSON.stringify(newMsg)});
-
-      msgs.push(newMsg);
-      input.value = "";
-      renderMessages();
-      buildConvList();
-    }
-  </script>
+/* ===== Enviar ===== */
+async function sendMessage(e){
+  e.preventDefault();
+  const input = document.getElementById("msgInput");
+  const text = input.value.trim();
+  if(!text || !selectedUser) return;
+  const newMsg = { id: Date.now().toString(), de: currentUser.nome, para: selectedUser, mensagem: text, data: new Date().toISOString() };
+  await fetchSheet(SHEET_MSGS, {method:"POST", body:JSON.stringify(newMsg)});
+  msgs.push(newMsg);
+  input.value = "";
+  renderMessages();
+  buildConvList();
+}
+</script>
 </body>
 </html>

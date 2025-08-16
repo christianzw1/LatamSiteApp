@@ -5,370 +5,337 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LATAM ADM • Estoque</title>
-
-  <!-- Roboto -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
-
   <style>
-    /* ---------- Variáveis ---------- */
     :root{
-      --latam-magenta:#c41230;
-      --bg-1:#000; --bg-2:#011627; --bg-3:#1b006b;
-      --card-bg:#10151f; --accent:#6d28d9;
-      --text:#f1f5f9; --ok:#22c55e; --attn:#ffc107; --crit:var(--latam-magenta);
+      --bg:#0b1220; --bg-soft:#0e1621; --card:#10151f; --card-2:#0f1726;
+      --text:#f1f5f9; --muted:#a0aec0; --line:#233040; --accent:#6d28d9;
+      --ok:#22c55e; --attn:#ffc107; --crit:#c41230;
     }
-
-    /* ---------- Reset ---------- */
+    :root[data-theme="light"]{
+      --bg:#f5f7fb; --bg-soft:#ffffff; --card:#ffffff; --card-2:#f3f6fb;
+      --text:#0f172a; --muted:#475569; --line:#d7dde6; --accent:#6d28d9;
+      --ok:#16a34a; --attn:#b45309; --crit:#c41230;
+    }
     *{margin:0;padding:0;box-sizing:border-box;font-family:"Roboto",sans-serif;}
-
-    /* ---------- Travar largura ---------- */
-    html,body{max-width:100%;overflow-x:hidden;}
-
-    /* ---------- Fundo animado ---------- */
-    @keyframes bgFlow{0%{background-position:0 0;}100%{background-position:400% 0;}}
-    body{
-      background:linear-gradient(130deg,var(--bg-1),var(--bg-2) 45%,var(--bg-3));
-      background-size:400% 400%;animation:bgFlow 25s ease infinite;
-      color:var(--text);
-      padding:1.4rem .8rem;
-    }
-
-    h2{color:var(--accent);margin-bottom:.9rem;}
-
-    /* ---------- Card ---------- */
-    .card{
-      width:100%;
-      background:var(--card-bg);
-      border-radius:14px;
-      box-shadow:0 6px 25px rgba(0,0,0,.45);
-      padding:1.4rem 1.2rem;
-      margin-bottom:.9rem;
-    }
-
-    /* ---------- Tabelas ---------- */
-    #dashboard,.hist-table{overflow-x:auto;}
-    table{
-      width:100%;table-layout:fixed;border-collapse:collapse;font-size:.9rem;word-break:break-word;
-    }
-    th,td{padding:.6rem .65rem;border:1px solid #333;text-align:left;}
-    th{background:#0e1621;position:sticky;top:0;z-index:5;}
-
-    tr.ok   td{background:rgba(34,197,94,.16);}
-    tr.attn td{background:rgba(255,193,7,.13);}
-    tr.crit td{background:rgba(196,18,48,.20);}
-
-    /* ---------- Formulário ---------- */
-    form{display:flex;flex-direction:column;gap:.9rem;max-width:460px;}
-    label{font-size:.88rem;font-weight:500;}
-
-    /* wrapper p/ autocomplete */
-    .autocomplete{position:relative;}
-
-    input,select,textarea{
-      width:100%;padding:.52rem .7rem;font-size:.9rem;
-      background:#0e1621;border:1px solid #444;border-radius:8px;
-      color:var(--text);outline:none;
-      transition:border .2s,box-shadow .2s;
-    }
-    input:focus,select:focus,textarea:focus{
-      border-color:var(--accent);box-shadow:0 0 0 3px rgba(109,40,217,.35);
-    }
-    ::placeholder{color:#6c7a8d;}
-    input[type=number]{-moz-appearance:textfield;}
-    input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{display:none;}
-
-    .btn{
-      align-self:flex-start;background:var(--accent);color:#fff;border:none;
-      border-radius:8px;padding:.6rem 1.4rem;font-weight:500;cursor:pointer;
-      transition:background .2s,transform .15s;
-    }
-    .btn:hover{background:#5b21b6;} .btn:active{transform:scale(.97);}
-
-    .msg{font-size:.83rem;margin-top:.25rem;}
-    .msg.success{color:var(--ok);} .msg.error{color:var(--crit);}
-
-    /* ---------- Autocomplete ---------- */
-    .autocomplete-list{
-      display:none;           /* é mostrada via JS */
-      position:absolute;left:0;right:0;top:100%;
-      background:#0e1621;border:1px solid #444;border-top:none;
-      max-height:230px;overflow-y:auto;
-      border-radius:0 0 8px 8px;z-index:1000;
-    }
-    .autocomplete-list .option{
-      padding:.55rem .7rem;cursor:pointer;white-space:nowrap;
-      text-overflow:ellipsis;overflow:hidden;
-    }
-    .autocomplete-list .option:hover{
-      background:rgba(109,40,217,.25);
-    }
-
-    /* ---------- Filtros do histórico ---------- */
-    .hist-filters{
-      display:flex;gap:.6rem;margin-bottom:.7rem;flex-wrap:wrap;
-    }
-    .hist-filters input,.hist-filters select{
-      background:#0e1621;border:1px solid #444;border-radius:8px;
-      padding:.45rem .6rem;font-size:.86rem;color:var(--text);
-    }
-    .hist-filters input{flex:1;min-width:120px;}
-    .hist-filters select{flex:0 0 160px;}
-
-    /* ---------- Mobile ---------- */
-    @media(max-width:480px){
-      body{padding:1rem .5rem;}
-      .card{padding:1.2rem .9rem;}
-      form{max-width:100%;}
-      .btn{width:100%;text-align:center;}
-      table{font-size:.82rem;}
-      .hist-filters{flex-direction:column;}
-      .hist-filters select{width:100%;}
+    html,body{height:100%;}
+    body{background:var(--bg);color:var(--text);padding:1rem;font-size:16px;}
+    .wrap{min-height:100%;display:grid;grid-template-rows:auto 1fr;gap:1rem;max-width:1200px;margin:0 auto;}
+    .tabs{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .tab{background:var(--bg-soft);border:1px solid var(--line);padding:.55rem .95rem;border-radius:999px;cursor:pointer;color:var(--text);}
+    .tab.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(109,40,217,.25);}
+    .grid{display:grid;gap:1rem;grid-template-columns:2fr 1.2fr;align-items:stretch;min-height:0;}
+    @media(max-width:920px){.grid{grid-template-columns:1fr;}}
+    .col{display:flex;flex-direction:column;min-height:0;}
+    .card{background:var(--card);border-radius:16px;box-shadow:0 6px 18px rgba(0,0,0,.25);padding:1rem;height:100%;border:1px solid var(--line);}
+    .card h2{font-size:1rem;margin-bottom:.6rem;color:var(--text);}
+    table{width:100%;border-collapse:collapse;table-layout:fixed;}
+    th,td{padding:.55rem .6rem;border:1px solid var(--line);text-align:left;word-break:break-word;}
+    th{background:var(--bg-soft);position:sticky;top:0;z-index:5;}
+    tr.ok td{background:rgba(34,197,94,.12);} tr.attn td{background:rgba(255,193,7,.1);} tr.crit td{background:rgba(196,18,48,.15);}
+    :root[data-theme="light"] tr.ok td{background:#e9f9ef;} :root[data-theme="light"] tr.attn td{background:#fff7e6;} :root[data-theme="light"] tr.crit td{background:#fde8ec;}
+    .scroll{height:var(--pane-h, 420px);overflow:auto;border-radius:12px;}
+    label{font-size:.9rem;color:var(--text);}
+    input,select,textarea{width:100%;background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:.6rem .75rem;outline:none;transition:.2s;margin-top:.25rem;}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(109,40,217,.25);}
+    .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;}
+    .btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:.6rem .9rem;cursor:pointer;transition:.2s;}
+    .btn:hover{filter:brightness(.95);} .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text);} .btn.warn{background:var(--crit);}
+    .msg{font-size:.9rem;margin-top:.35rem;} .msg.success{color:#bbf7d0;} .msg.error{color:#fecaca;}
+    .muted{color:var(--muted);font-size:.92rem;}
+    @media(max-width:560px){
+      table.responsive thead{display:none;}
+      table.responsive tr{display:block;border:1px solid var(--line);border-radius:12px;margin-bottom:.6rem;background:var(--card-2);}
+      table.responsive td{display:flex;justify-content:space-between;gap:.8rem;border:none;border-bottom:1px solid var(--line);}
+      table.responsive td:last-child{border-bottom:none;}
+      table.responsive td::before{content:attr(data-label);font-weight:600;color:var(--text);}
     }
   </style>
 </head>
-
 <body>
-  <!-- === DASHBOARD === -->
-  <div class="card">
-    <h2>Estoque Atual</h2>
-    <div id="dashboard"></div>
+<div class="wrap">
+
+  <div class="tabs">
+    <div class="tab active" data-tab="estoque">📦 Estoque</div>
+    <div class="tab" data-tab="mov">🧾 Movimentar</div>
+    <div class="tab" data-tab="hist">🕑 Histórico</div>
   </div>
 
-  <!-- === NOVA MOVIMENTAÇÃO === -->
-  <div class="card">
-    <h2>Nova Movimentação</h2>
-    <form id="txnForm">
-      <div>
-        <label for="itemInput">Item</label>
-        <div class="autocomplete">
-          <!-- Mantém o datalist para quem estiver em desktop, mas agora há um autocomplete JS universal -->
-          <input id="itemInput" type="text" list="itemsList"
-                 placeholder="Comece a digitar..." autocomplete="off" required />
-          <datalist id="itemsList"></datalist>
-          <div id="itemSuggestions" class="autocomplete-list"></div>
+  <div class="grid">
+    <div class="col">
+      <div class="card tab-panel" id="tab-estoque">
+        <h2>Estoque Atual</h2>
+        <div class="scroll">
+          <table id="tblEstoque" class="responsive">
+            <thead><tr><th>Item</th><th>Unid.</th><th>Mín.</th><th>Atual</th><th>Ação</th></tr></thead>
+            <tbody><tr><td colspan="5" class="muted">Carregando…</td></tr></tbody>
+          </table>
         </div>
       </div>
 
-      <div>
-        <label for="txnType">Tipo</label>
-        <select id="txnType" required>
-          <option value="IN">Entrada</option>
-          <option value="OUT">Saída</option>
-        </select>
+      <div class="card tab-panel" id="tab-mov" style="display:none;">
+        <h2>Nova Movimentação</h2>
+        <div class="row">
+          <div style="flex:1;min-width:220px">
+            <label>Item</label>
+            <input id="itemInput" list="itemsList" placeholder="Digite para buscar…" />
+            <datalist id="itemsList"></datalist>
+          </div>
+          <div>
+            <label>Tipo</label>
+            <select id="txnType"><option value="IN">Entrada</option><option value="OUT">Saída</option></select>
+          </div>
+          <div>
+            <label>Quantidade</label>
+            <input type="number" id="quantity" min="1" value="1" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:.6rem">
+          <button class="btn" id="btnSalvar">Salvar</button>
+          <button class="btn ghost" id="qPlus">+1</button>
+          <button class="btn ghost" id="qMinus">-1</button>
+          <button class="btn warn" id="toggleTipo">Alternar IN/OUT</button>
+          <input id="notes" style="flex:1;min-width:140px" placeholder="Observações (opcional)" />
+        </div>
+        <div id="formMsg" class="msg"></div>
+
+        <div style="margin-top:1rem">
+          <h2>Histórico do item selecionado</h2>
+          <div class="scroll">
+            <table id="tblItemHist" class="responsive">
+              <thead><tr><th>Data</th><th>Qtd</th><th>Usuário</th><th>Obs.</th></tr></thead>
+              <tbody><tr><td colspan="4" class="muted">Selecione um item para ver o histórico.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <div>
-        <label for="quantity">Quantidade</label>
-        <input type="number" id="quantity" min="1" required />
+      <div class="card tab-panel" id="tab-hist" style="display:none;">
+        <h2>Histórico de Movimentações</h2>
+        <div class="row" style="margin-bottom:.6rem">
+          <input id="histSearch" style="flex:1;min-width:140px" placeholder="Pesquisar item…" />
+          <select id="histSort">
+            <option value="new">Mais recentes</option>
+            <option value="old">Mais antigas</option>
+            <option value="in">Somente Entradas</option>
+            <option value="out">Somente Saídas</option>
+          </select>
+          <button class="btn ghost" id="histThisItem" disabled>Este item</button>
+        </div>
+        <div class="scroll">
+          <table id="tblHist" class="responsive">
+            <thead><tr><th>Data</th><th>Item</th><th>Qtd</th><th>Usuário</th><th>Obs.</th></tr></thead>
+            <tbody><tr><td colspan="5" class="muted">Carregando…</td></tr></tbody>
+          </table>
+        </div>
       </div>
-
-      <div>
-        <label for="notes">Observações</label>
-        <textarea id="notes" rows="2" placeholder="(opcional)"></textarea>
-      </div>
-
-      <button type="submit" class="btn">Salvar</button>
-      <div id="formMsg" class="msg"></div>
-    </form>
-  </div>
-
-  <!-- === HISTÓRICO === -->
-  <div class="card">
-    <h2>Histórico de Movimentações</h2>
-
-    <div class="hist-filters">
-      <input type="text" id="histSearch" placeholder="Pesquisar item…" />
-      <select id="histSort">
-        <option value="new">Mais recentes</option>
-        <option value="old">Mais antigas</option>
-        <option value="in">Somente Entradas</option>
-        <option value="out">Somente Saídas</option>
-      </select>
     </div>
 
-    <div id="history" class="hist-table"></div>
+    <div class="col">
+      <div class="card">
+        <h2>Acesso Rápido</h2>
+        <div class="row" style="margin-bottom:.6rem">
+          <button class="btn" onclick="goTab('mov')">Nova Movimentação</button>
+          <button class="btn ghost" onclick="goTab('hist')">Abrir Histórico</button>
+        </div>
+        <div id="quickInfo" class="muted">Carregando…</div>
+        <div style="margin-top:.8rem">
+          <h2>Reposição urgente</h2>
+          <div class="scroll">
+            <table id="tblUrg" class="responsive">
+              <thead><tr><th>Item</th><th>Atual</th><th>Mín.</th></tr></thead>
+              <tbody><tr><td colspan="3" class="muted">Carregando…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script>
-  /* ===== CONFIG ===== */
-  const API_URL     = "https://script.google.com/macros/s/AKfycbxZ8ogL76p3vIUPZsiPLv9XnAhN1Z6KWK3IhRgKyGMUYN-2AmxQYUuO2v8i-PQxSpP_Cg/exec";
-  const SHEET_ITEMS = "ESTOQUE";
-  const SHEET_TXNS  = "MOVIMENTACOES";
+</div>
 
-  /* ===== VARS & UTIL ===== */
-  let items=[], txns=[], stock={};
-  const qs=s=>document.querySelector(s);
-  const itemById=id=>items.find(i=>i.id===id)||{};
-  const showMsg=(el,t,e=false)=>{el.textContent=t;el.className="msg "+(e?"error":"success");};
+<script>
+/* ===== Tema herdado do parent ===== */
+function applyTheme(mode){
+  if(mode==="light") document.documentElement.setAttribute("data-theme","light");
+  else document.documentElement.removeAttribute("data-theme");
+}
+applyTheme(localStorage.getItem("theme")||"dark");
+window.addEventListener("message",(e)=>{ if(e?.data?.type==="theme"){ applyTheme(e.data.value); }});
 
-  async function fetchSheet(sheet,opts={}){
-    const r=await fetch(`${API_URL}?sheet=${encodeURIComponent(sheet)}`,opts);
-    if(!r.ok) throw new Error(await r.text());
-    const ct=r.headers.get("content-type")||"";
-    return ct.includes("application/json")?r.json():r.text();
-  }
+/* ===== Altura dos painéis ===== */
+function setPaneHeights(){
+  const margem = 220;
+  const h = Math.max(320, Math.round(window.innerHeight - margem));
+  document.documentElement.style.setProperty('--pane-h', h + 'px');
+}
+addEventListener('resize', setPaneHeights); setPaneHeights();
 
-  /* ===== LOAD DATA ===== */
-  document.addEventListener("DOMContentLoaded",async()=>{
-    try{
-      [items,txns]=await Promise.all([fetchSheet(SHEET_ITEMS),fetchSheet(SHEET_TXNS)]);
-      calcStock();
-      renderTable();
-      fillDatalist();          // ainda preenche o <datalist> (desktop fallback)
-      setupAutocomplete();     // novo – lista JS que funciona em todo lugar
-      renderHistory();
+/* ===== CONFIG ===== */
+const API_URL="https://script.google.com/macros/s/AKfycbxZ8ogL76p3vIUPZsiPLv9XnAhN1Z6KWK3IhRgKyGMUYN-2AmxQYUuO2v8i-PQxSpP_Cg/exec";
+const SHEET_ITEMS="ESTOQUE"; const SHEET_TXNS="MOVIMENTACOES";
+const currentUser = JSON.parse(localStorage.getItem("currentUser")||"{}");
 
-      qs("#txnForm").addEventListener("submit",saveTxn);
-      qs("#histSort").addEventListener("change",renderHistory);
-      qs("#histSearch").addEventListener("input",renderHistory);
-    }catch(err){alert("Erro ao carregar: "+err.message);console.error(err);}
-  });
+/* ===== STATE ===== */
+let items=[], txns=[], stock={}, selectedItemId=null;
 
-  function calcStock(){
-    stock={};items.forEach(i=>stock[i.id]=0);
-    txns.forEach(t=>{
-      const s=t.tipo==="IN"?1:-1;
-      stock[t.item]=(stock[t.item]||0)+s*Number(t.quantidade||0);
-    });
-  }
+/* ===== UTILS ===== */
+const $=(s,root=document)=>root.querySelector(s);
+async function fetchSheet(sheet,opts={}){ const r=await fetch(`${API_URL}?sheet=${encodeURIComponent(sheet)}`,opts); if(!r.ok) throw new Error(await r.text()); const ct=r.headers.get("content-type")||""; return ct.includes("application/json")?r.json():r.text(); }
+function normalize(){
+  // força IDs como string para evitar undefined no "Selecionar"
+  items = items.map(i=>({...i, id:String(i.id)}));
+  txns  = txns.map(t=>({...t,  item:String(t.item)}));
+}
+function calcStock(){ stock={}; items.forEach(i=>stock[i.id]=0); txns.forEach(t=>{ const s=t.tipo==="IN"?1:-1; stock[t.item]=(stock[t.item]||0)+s*Number(t.quantidade||0); }); }
+function itemById(id){ return items.find(i=>String(i.id)===String(id))||{}; }
 
-  /* ===== DASHBOARD ===== */
-  function renderTable(){
-    const dash=qs("#dashboard");
-    if(!items.length){dash.innerHTML="<p>Nenhum item cadastrado.</p>";return;}
-    dash.innerHTML=
-      `<table>
-        <thead><tr><th>Item</th><th>Unid.</th><th>Mín.</th><th>Atual</th></tr></thead>
-        <tbody>${
-          items.map(it=>{
-            const q=stock[it.id]||0;
-            const c=q<=it.minLevel?"crit":q<=it.minLevel*2?"attn":"ok";
-            return `<tr class="${c}">
-                      <td>${it.name}</td><td>${it.unit}</td>
-                      <td>${it.minLevel}</td><td>${q}</td>
-                    </tr>`;
-          }).join("")
-        }</tbody>
-      </table>`;
-  }
+/* ===== TABS ===== */
+function goTab(name){ document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===name)); document.querySelectorAll(".tab-panel").forEach(p=>p.style.display = p.id===`tab-${name}`?"block":"none"); }
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>goTab(t.dataset.tab)));
 
-  /* ===== LISTA DE ITENS (datalist) ===== */
-  function fillDatalist(){
-    const list=qs("#itemsList");
-    list.innerHTML="";
-    items.forEach(i=>list.insertAdjacentHTML("beforeend",`<option value="${i.name}">`));
-  }
-
-  /* ===== NOVO AUTOCOMPLETE CROSS-DEVICE ===== */
-  function setupAutocomplete(){
-    const input = qs("#itemInput");
-    const box   = qs("#itemSuggestions");
-
-    function closeBox(){ box.style.display="none"; }
-
-    // fecha ao clicar fora
-    document.addEventListener("click",e=>{
-      if(!e.target.closest(".autocomplete")) closeBox();
-    });
-
-    box.addEventListener("click",e=>{
-      const opt=e.target.closest(".option");
-      if(opt){
-        input.value=opt.dataset.name;
-        closeBox();
-      }
-    });
-
-    input.addEventListener("input",update);
-    input.addEventListener("focus",update);
-
-    function update(){
-      const val=input.value.trim().toLowerCase();
-      if(!val){ closeBox(); return; }
-
-      const matches = items
-        .filter(i=>i.name.toLowerCase().includes(val))
-        .slice(0,30); // limita para não estourar a tela
-
-      if(!matches.length){ closeBox(); return; }
-
-      box.innerHTML = matches
-        .map(i=>`<div class="option" data-name="${i.name}">${i.name}</div>`)
-        .join("");
-
-      box.style.display="block";
+/* ===== LOAD ===== */
+(async()=>{
+  try{
+    const cacheI = localStorage.getItem("cache:ESTOQUE");
+    const cacheT = localStorage.getItem("cache:MOVIMENTACOES");
+    if(cacheI && cacheT){
+      const {data:ci}=JSON.parse(cacheI); const {data:ct}=JSON.parse(cacheT);
+      items=ci; txns=ct; normalize(); calcStock(); renderAll();
+      Promise.all([fetchSheet(SHEET_ITEMS), fetchSheet(SHEET_TXNS)]).then(([i,t])=>{
+        items=i; txns=t; normalize();
+        localStorage.setItem("cache:ESTOQUE",JSON.stringify({ts:Date.now(),data:items}));
+        localStorage.setItem("cache:MOVIMENTACOES",JSON.stringify({ts:Date.now(),data:txns}));
+        calcStock(); renderAll();
+      }).catch(console.error);
+    }else{
+      [items,txns]=await Promise.all([fetchSheet(SHEET_ITEMS), fetchSheet(SHEET_TXNS)]);
+      normalize();
+      localStorage.setItem("cache:ESTOQUE",JSON.stringify({ts:Date.now(),data:items}));
+      localStorage.setItem("cache:MOVIMENTACOES",JSON.stringify({ts:Date.now(),data:txns}));
+      calcStock(); renderAll();
     }
-  }
+  }catch(e){ console.error(e); alert("Erro ao carregar estoque."); }
+})();
 
-  /* ===== HISTÓRICO ===== */
-  function renderHistory(){
-    const hist=qs("#history");
-    if(!txns.length){hist.innerHTML="<p>Sem movimentações.</p>";return;}
+function renderAll(){ renderEstoque(); renderUrgencias(); renderHistFull(); fillDatalist(); renderQuickInfo(); }
 
-    /* --- filtros --- */
-    const mode   = qs("#histSort").value;
-    const search = qs("#histSearch").value.trim().toLowerCase();
+/* ===== ESTOQUE ===== */
+function renderEstoque(){
+  const tbody=$("#tblEstoque tbody");
+  if(!items.length){ tbody.innerHTML=`<tr><td colspan="5" class="muted">Nenhum item.</td></tr>`; return; }
+  tbody.innerHTML=items.map(it=>{
+    const q=stock[it.id]||0, cls=q<=it.minLevel?"crit":q<=it.minLevel*2?"attn":"ok";
+    return `<tr class="${cls}">
+      <td data-label="Item">${it.name}</td>
+      <td data-label="Unid.">${it.unit}</td>
+      <td data-label="Mín.">${it.minLevel}</td>
+      <td data-label="Atual">${q}</td>
+      <td data-label="Ação"><button class="btn ghost" data-pick="${String(it.id)}">Selecionar</button></td>
+    </tr>`;
+  }).join("");
+  tbody.querySelectorAll("[data-pick]").forEach(b=>b.addEventListener("click",()=>{
+    selectedItemId=b.getAttribute("data-pick");
+    const it = itemById(selectedItemId);
+    $("#itemInput").value = it.name || "";
+    $("#histThisItem").disabled=false;
+    renderItemHist(selectedItemId);
+    goTab("mov");
+  }));
+}
 
-    let list=[...txns];
+/* ===== URGÊNCIAS ===== */
+function renderUrgencias(){
+  const urg=items.map(i=>({it:i,q:stock[i.id]||0})).filter(x=>x.q<=x.it.minLevel)
+    .sort((a,b)=>(a.q-a.it.minLevel)-(b.q-b.it.minLevel)).slice(0,12);
+  const tbody=$("#tblUrg tbody");
+  tbody.innerHTML = urg.length ? urg.map(({it,q})=>`<tr>
+    <td data-label="Item">${it.name}</td>
+    <td data-label="Atual">${q}</td>
+    <td data-label="Mín.">${it.minLevel}</td>
+  </tr>`).join("") : `<tr><td colspan="3" class="muted">Sem urgências. 🔋</td></tr>`;
+}
 
-    if(mode==="in"||mode==="out") list=list.filter(t=>t.tipo===mode.toUpperCase());
-    if(mode==="old") list.sort((a,b)=>new Date(a.data)-new Date(b.data));
-    else             list.sort((a,b)=>new Date(b.data)-new Date(a.data));
+/* ===== QUICK INFO ===== */
+function renderQuickInfo(){
+  const abaixo = items.filter(i => (stock[i.id]||0) <= i.minLevel).length;
+  const ult24 = txns.filter(t=>Date.now()-new Date(t.data).getTime()<24*3600*1000);
+  const in24  = ult24.filter(t=>t.tipo==="IN").length;
+  const out24 = ult24.filter(t=>t.tipo==="OUT").length;
+  $("#quickInfo").innerHTML = `
+    <div class="row" style="margin-bottom:.3rem;gap:.5rem">
+      <span class="btn ghost">Abaixo do mínimo: ${abaixo}</span>
+      <span class="btn ghost">Entradas 24h: +${in24}</span>
+      <span class="btn ghost">Saídas 24h: −${out24}</span>
+    </div>
+    <span class="muted">Dica: clique em “Selecionar” na tabela para preencher o formulário e ver o histórico do item.</span>`;
+}
 
-    if(search) list=list.filter(t=>(itemById(t.item).name||"").toLowerCase().includes(search));
+/* ===== DATALIST ===== */
+function fillDatalist(){ $("#itemsList").innerHTML=items.map(i=>`<option value="${i.name}">`).join(""); }
 
-    if(!list.length){hist.innerHTML="<p>Nenhuma movimentação encontrada.</p>";return;}
+/* ===== HISTÓRICO (FULL) ===== */
+function renderHistFull(){
+  const mode=$("#histSort").value, search=($("#histSearch").value||"").trim().toLowerCase();
+  let list=[...txns];
+  if(mode==="in"||mode==="out") list=list.filter(t=>t.tipo===mode.toUpperCase());
+  if(mode==="old") list.sort((a,b)=>new Date(a.data)-new Date(b.data)); else list.sort((a,b)=>new Date(b.data)-new Date(a.data));
+  if(search) list=list.filter(t=>(itemById(t.item).name||"").toLowerCase().includes(search));
+  const tbody=$("#tblHist tbody");
+  tbody.innerHTML = list.length ? list.map(t=>{
+    const sign=t.tipo==="IN"?"+":"–"; const color=t.tipo==="IN"?"#16a34a":"#c41230";
+    return `<tr>
+      <td data-label="Data">${t.data}</td>
+      <td data-label="Item">${itemById(t.item).name||"-"}</td>
+      <td data-label="Qtd" style="color:${color};font-weight:600;">${sign}${t.quantidade}</td>
+      <td data-label="Usuário">${t.usuario||"-"}</td>
+      <td data-label="Obs.">${t.notas||""}</td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="5" class="muted">Sem movimentações.</td></tr>`;
+}
+$("#histSort").addEventListener("change",renderHistFull);
+$("#histSearch").addEventListener("input",renderHistFull);
+$("#histThisItem").addEventListener("click",()=>{ if(!selectedItemId) return; $("#histSearch").value=itemById(selectedItemId).name||""; goTab("hist"); renderHistFull(); });
 
-    const rows=list.map(t=>{
-      const sign=t.tipo==="IN"?"+":"–";
-      const cor =t.tipo==="IN"?"var(--ok)":"var(--crit)";
-      return `<tr>
-                <td>${t.data}</td>
-                <td>${itemById(t.item).name||"-"}</td>
-                <td style="color:${cor};font-weight:600;">${sign}${t.quantidade}</td>
-                <td>${t.usuario||"-"}</td>
-                <td>${t.notas||""}</td>
-              </tr>`;
-    }).join("");
+/* ===== HISTÓRICO DO ITEM ===== */
+function renderItemHist(id){
+  const tbody=$("#tblItemHist tbody");
+  const list=txns.filter(t=>String(t.item)===String(id)).sort((a,b)=>new Date(b.data)-new Date(a.data)).slice(0,30);
+  tbody.innerHTML = list.length ? list.map(t=>{
+    const sign=t.tipo==="IN"?"+":"–"; const color=t.tipo==="IN"?"#16a34a":"#c41230";
+    return `<tr>
+      <td data-label="Data">${t.data}</td>
+      <td data-label="Qtd" style="color:${color};font-weight:600;">${sign}${t.quantidade}</td>
+      <td data-label="Usuário">${t.usuario||"-"}</td>
+      <td data-label="Obs.">${t.notas||""}</td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="4" class="muted">Sem histórico para este item.</td></tr>`;
+}
 
-    hist.innerHTML=
-      `<table>
-        <thead><tr><th>Data</th><th>Item</th><th>Qtd</th><th>Usuário</th><th>Obs.</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>`;
-  }
+/* ===== SALVAR ===== */
+$("#qPlus").addEventListener("click",()=>{ const v=Number($("#quantity").value||1); $("#quantity").value=Math.max(1,v+1); });
+$("#qMinus").addEventListener("click",()=>{ const v=Number($("#quantity").value||1); $("#quantity").value=Math.max(1,v-1); });
+$("#toggleTipo").addEventListener("click",()=>{ $("#txnType").value = $("#txnType").value==="IN"?"OUT":"IN"; });
 
-  /* ===== SALVAR MOVIMENTAÇÃO ===== */
-  async function saveTxn(e){
-    e.preventDefault();
-    const msgEl=qs("#formMsg");
-
-    const itemName = qs("#itemInput").value.trim();
-    const item     = items.find(i=>i.name.toLowerCase()===itemName.toLowerCase());
-    const tipo     = qs("#txnType").value;
-    const qty      = Number(qs("#quantity").value);
-    const notas    = qs("#notes").value.trim();
-
-    if(!item||qty<=0){showMsg(msgEl,"Preencha corretamente.",true);return;}
-
-    const user=JSON.parse(localStorage.getItem("currentUser")||"{}");
-    const payload={
-      id:Date.now().toString(36),
-      item:item.id,tipo,quantidade:qty,
-      usuario:user?.nome||"Desconhecido",
-      data:new Date().toISOString().split("T")[0],
-      notas
-    };
-
-    try{
-      await fetchSheet(SHEET_TXNS,{method:"POST",body:JSON.stringify(payload)});
-      showMsg(msgEl,"Movimentação salva!");
-      txns.push(payload);
-      stock[item.id]=(stock[item.id]||0)+(tipo==="IN"?qty:-qty);
-      renderTable();renderHistory();
-      e.target.reset();
-    }catch(err){showMsg(msgEl,"Erro ao salvar.",true);console.error(err);}
-  }
-  </script>
+$("#btnSalvar").addEventListener("click", async ()=>{
+  const msgEl=$("#formMsg");
+  const itemName=$("#itemInput").value.trim();
+  const item=items.find(i=>i.name.toLowerCase()===itemName.toLowerCase());
+  const tipo=$("#txnType").value;
+  const qty=Number($("#quantity").value);
+  const notas=$("#notes").value.trim();
+  if(!item || qty<=0){ msgEl.className="msg error"; msgEl.textContent="Preencha item e quantidade válidos."; return; }
+  const payload={ id:Date.now().toString(36), item:String(item.id), tipo, quantidade:qty,
+    usuario: currentUser?.nome || "Desconhecido",
+    data:new Date().toISOString().split("T")[0], notas };
+  try{
+    await fetchSheet(SHEET_TXNS,{method:"POST",body:JSON.stringify(payload)});
+    txns.push(payload); calcStock(); renderEstoque(); renderUrgencias(); renderQuickInfo();
+    if(selectedItemId===item.id) renderItemHist(item.id);
+    msgEl.className="msg success"; msgEl.textContent="Movimentação salva!";
+    $("#notes").value="";
+  }catch(e){ console.error(e); msgEl.className="msg error"; msgEl.textContent="Erro ao salvar."; }
+});
+</script>
 </body>
 </html>
